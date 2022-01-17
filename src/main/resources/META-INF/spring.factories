@@ -1,0 +1,11 @@
+# Environment Post Processors
+org.springframework.boot.env.EnvironmentPostProcessor=\
+  com.sbapp.starters.CustomEnvPP
+
+# Application Context Initializers
+org.springframework.context.ApplicationContextInitializer=\
+  com.sbapp.starters.BadProfileInitializer
+
+# Error Reporters
+org.springframework.boot.diagnostics.FailureAnalyzer=\
+  com.sbapp.starters.ProfileNeededFailureAnalyse
