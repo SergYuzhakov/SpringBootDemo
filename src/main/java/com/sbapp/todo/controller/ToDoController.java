@@ -1,5 +1,7 @@
-package com.sbapp.todo;
+package com.sbapp.todo.controller;
 
+import com.sbapp.todo.ToDo;
+import com.sbapp.todo.ToDoBuilder;
 import com.sbapp.todo.errorhandler.ToDoValidationError;
 import com.sbapp.todo.errorhandler.ToDoValidationErrorBuilder;
 import com.sbapp.todo.repo.CommonRepository;

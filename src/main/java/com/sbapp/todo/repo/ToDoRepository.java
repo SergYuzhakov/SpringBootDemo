@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Repository
+
 public class ToDoRepository implements CommonRepository<ToDo> {
     private Map<String, ToDo> toDos = new HashMap<>();
 
