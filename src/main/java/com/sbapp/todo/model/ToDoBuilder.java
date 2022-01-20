@@ -1,4 +1,4 @@
-package com.sbapp.todo;
+package com.sbapp.todo.model;
 
 public class ToDoBuilder {
     private static ToDoBuilder instance = new ToDoBuilder();
@@ -16,10 +16,14 @@ public class ToDoBuilder {
         this.id = id;
         return instance;
     }
+    /* При использовании Data JPA надобность в этой фабрике отпадет
+
     public ToDo build(){
         ToDo result = new ToDo(this.description);
         if(id != null)
             result.setId(id);
         return result;
     }
+
+     */
 }

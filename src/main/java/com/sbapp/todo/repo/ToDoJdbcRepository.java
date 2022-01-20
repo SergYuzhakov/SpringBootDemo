@@ -1,10 +1,9 @@
 package com.sbapp.todo.repo;
 
-import com.sbapp.todo.ToDo;
+import com.sbapp.todo.model.ToDo;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.util.Collection;
@@ -12,7 +11,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-@Repository
+
 public class ToDoJdbcRepository implements CommonRepository<ToDo>{
     private static final String SQL_INSERT = "insert into todo (id, description, created, modified, completed) values (:id,:description,:created,:modified,:completed)";
     private static final String SQL_QUERY_FIND_ALL = "select id, description, created, modified, completed from todo";
@@ -27,7 +26,7 @@ public class ToDoJdbcRepository implements CommonRepository<ToDo>{
 
     private RowMapper<ToDo> toDoRowMapper = (ResultSet rs, int rowNum) -> {
         ToDo toDo = new ToDo();
-        toDo.setId(rs.getString("id"));
+        toDo.setId(rs.getInt("id"));
         toDo.setDescription(rs.getString("description"));
         toDo.setModified(rs.getTimestamp("modified").toLocalDateTime());
         toDo.setCreated(rs.getTimestamp("created").toLocalDateTime());
@@ -68,15 +67,15 @@ public class ToDoJdbcRepository implements CommonRepository<ToDo>{
 
     @Override
     public void delete(ToDo domain) {
-        Map<String, String> namedParameters = Collections.singletonMap("id",
+        Map<String, Integer> namedParameters = Collections.singletonMap("id",
                 domain.getId());
         this.jdbcTemplate.update(SQL_DELETE,namedParameters);
     }
 
     @Override
-    public ToDo findById(String id) {
+    public ToDo findById(Integer id) {
         try {
-            Map<String, String> namedParameters = Collections.
+            Map<String, Integer> namedParameters = Collections.
                     singletonMap("id", id);
             return this.jdbcTemplate.queryForObject(SQL_QUERY_FIND_BY_ID,
                     namedParameters, toDoRowMapper);
@@ -89,4 +88,5 @@ public class ToDoJdbcRepository implements CommonRepository<ToDo>{
     public Iterable<ToDo> findAll() {
         return this.jdbcTemplate.query(SQL_QUERY_FIND_ALL, toDoRowMapper);
     }
+
 }

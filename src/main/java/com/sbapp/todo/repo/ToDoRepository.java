@@ -1,8 +1,6 @@
 package com.sbapp.todo.repo;
 
-import com.sbapp.todo.ToDo;
-import com.sbapp.todo.repo.CommonRepository;
-import org.springframework.stereotype.Repository;
+import com.sbapp.todo.model.ToDo;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -13,7 +11,7 @@ import java.util.stream.Collectors;
 
 
 public class ToDoRepository implements CommonRepository<ToDo> {
-    private Map<String, ToDo> toDos = new HashMap<>();
+    private Map<Integer, ToDo> toDos = new HashMap<>();
 
     @Override
     public ToDo save(ToDo domain) {
@@ -40,7 +38,7 @@ public class ToDoRepository implements CommonRepository<ToDo> {
     }
 
     @Override
-    public ToDo findById(String id) {
+    public ToDo findById(Integer id) {
         return toDos.get(id);
     }
 
@@ -50,8 +48,6 @@ public class ToDoRepository implements CommonRepository<ToDo> {
                 (Map.Entry::getValue).collect(Collectors.toList());
     }
 
-    private Comparator<Map.Entry<String,ToDo>> entryComparator =
-            (Map.Entry<String,ToDo> o1, Map.Entry<String,ToDo> o2) -> {
-        return o1.getValue().getCreated().compareTo(o2.getValue().getCreated());
-            };
+    private Comparator<Map.Entry<Integer,ToDo>> entryComparator =
+            Comparator.comparing((Map.Entry<Integer, ToDo> o) -> o.getValue().getCreated());
 }
