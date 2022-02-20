@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 
 public class ToDoRepository implements CommonRepository<ToDo> {
-    private Map<Integer, ToDo> toDos = new HashMap<>();
+    private Map<Long, ToDo> toDos = new HashMap<>();
 
     @Override
     public ToDo save(ToDo domain) {
@@ -38,7 +38,7 @@ public class ToDoRepository implements CommonRepository<ToDo> {
     }
 
     @Override
-    public ToDo findById(Integer id) {
+    public ToDo findById(Long id) {
         return toDos.get(id);
     }
 
@@ -48,6 +48,6 @@ public class ToDoRepository implements CommonRepository<ToDo> {
                 (Map.Entry::getValue).collect(Collectors.toList());
     }
 
-    private Comparator<Map.Entry<Integer,ToDo>> entryComparator =
-            Comparator.comparing((Map.Entry<Integer, ToDo> o) -> o.getValue().getCreated());
+    private Comparator<Map.Entry<Long,ToDo>> entryComparator =
+            Comparator.comparing((Map.Entry<Long, ToDo> o) -> o.getValue().getCreated());
 }

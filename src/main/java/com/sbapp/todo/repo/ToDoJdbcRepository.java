@@ -26,7 +26,7 @@ public class ToDoJdbcRepository implements CommonRepository<ToDo>{
 
     private RowMapper<ToDo> toDoRowMapper = (ResultSet rs, int rowNum) -> {
         ToDo toDo = new ToDo();
-        toDo.setId(rs.getInt("id"));
+        toDo.setId(rs.getLong("id"));
         toDo.setDescription(rs.getString("description"));
         toDo.setModified(rs.getTimestamp("modified").toLocalDateTime());
         toDo.setCreated(rs.getTimestamp("created").toLocalDateTime());
@@ -67,15 +67,15 @@ public class ToDoJdbcRepository implements CommonRepository<ToDo>{
 
     @Override
     public void delete(ToDo domain) {
-        Map<String, Integer> namedParameters = Collections.singletonMap("id",
+        Map<String, Long> namedParameters = Collections.singletonMap("id",
                 domain.getId());
         this.jdbcTemplate.update(SQL_DELETE,namedParameters);
     }
 
     @Override
-    public ToDo findById(Integer id) {
+    public ToDo findById(Long id) {
         try {
-            Map<String, Integer> namedParameters = Collections.
+            Map<String, Long> namedParameters = Collections.
                     singletonMap("id", id);
             return this.jdbcTemplate.queryForObject(SQL_QUERY_FIND_BY_ID,
                     namedParameters, toDoRowMapper);

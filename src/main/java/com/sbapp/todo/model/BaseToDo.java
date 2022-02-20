@@ -15,13 +15,14 @@ import javax.persistence.*;
 @AllArgsConstructor
 @ToString
 
-public abstract class BaseToDo implements Persistable<Integer> {
+public abstract class BaseToDo implements Persistable<Long> {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected Integer id;
+    @GeneratedValue(generator = "ID_GENERATOR")
+    @Column(name = "id",unique = true, nullable = false)
+    protected Long id;
 
-    public int id(){
+    public Long id(){
         Assert.notNull(id, "Must be not null");
         return id;
     }
@@ -33,8 +34,9 @@ public abstract class BaseToDo implements Persistable<Integer> {
 
     @Override
     public int hashCode() {
-        return id == null ? 0 : id;
+        return id == null ? super.hashCode() : getId().hashCode();
     }
+
 
     @Override
     public boolean equals(Object obj) {

@@ -19,11 +19,14 @@ public class AppConfig {
     private static final String dateTimeFormat = "yyyy-MM-dd HH:mm";
 
 // Подключим TCP сервер H2 DB  для того, чтобы редактировать базу на лету в Idea
+    /*
     @Bean(initMethod = "start", destroyMethod = "stop")
     public Server h2server() throws SQLException {
         log.info("Start H2 TCP Server");
         return Server.createTcpServer("-tcp", "-tcpAllowOthers", "-tcpPort", "9092");
     }
+
+     */
 //if we want to use Java 8 date types and set a default date format, then we need to look at creating a Jackson2ObjectMapperBuilderCustomizer bean: https://www.baeldung.com/spring-boot-formatting-json-dates
     @Bean
     Jackson2ObjectMapperBuilderCustomizer jsonCustomizer(){
