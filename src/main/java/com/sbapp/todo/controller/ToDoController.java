@@ -4,6 +4,7 @@ import com.sbapp.todo.errorhandler.ToDoValidationError;
 import com.sbapp.todo.errorhandler.ToDoValidationErrorBuilder;
 import com.sbapp.todo.model.Address;
 import com.sbapp.todo.model.Client;
+import com.sbapp.todo.model.ElAddress;
 import com.sbapp.todo.model.ToDo;
 import com.sbapp.todo.repo.ClientsJpaRepository;
 import com.sbapp.todo.repo.ToDoJpaRepository;
@@ -26,10 +27,6 @@ import java.util.Optional;
 public class ToDoController {
     private ToDoJpaRepository repository;
     private ClientsJpaRepository clientsRepository;
-
-    // public ToDoController(ToDoJpaRepository repository) {
-    //     this.repository = repository;
-    // }
 
     @GetMapping("/todo")
     public ResponseEntity<Iterable<ToDo>> getToDos() {
@@ -61,20 +58,46 @@ public class ToDoController {
                 .build();
     }
 
-    @RequestMapping(value = "/todo", method = {RequestMethod.POST,
-            RequestMethod.PUT})
+    @RequestMapping(value = "/todo", method = {RequestMethod.POST})
     public ResponseEntity<?> createToDo(@Valid @RequestBody ToDo toDo,
                                         Errors errors) {
         if (errors.hasErrors()) {
             return ResponseEntity.badRequest().
                     body(ToDoValidationErrorBuilder.fromBindingErrors(errors));
         }
-        Client client = toDo.getClient();
 
-        if (client.isNew()) {
+        Client client = toDo.getClient();
+        ElAddress address = client.getElAddress();
+        Long clientId = clientsRepository.getClientByElAddress(address).getId();
+
+        if (clientId != null) {
+            toDo.setClient(clientsRepository.findById(clientId).get());
+        } else {
             clientsRepository.save(client);
+            toDo.setClient(clientsRepository.findById(client.getId()).get());
         }
-        toDo.setClient (clientsRepository.findById(client.getId()).get());
+
+        ToDo result = repository.save(toDo);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(result.getId())
+                .toUri();
+        return ResponseEntity.created(location).build();
+    }
+
+    @RequestMapping(value = "/todo", method = {RequestMethod.PUT})
+    public ResponseEntity<?> updateToDo(@Valid @RequestBody ToDo toDo,
+                                        Errors errors) {
+        if (errors.hasErrors()) {
+            return ResponseEntity.badRequest().
+                    body(ToDoValidationErrorBuilder.fromBindingErrors(errors));
+        }
+
+        Long todoId = toDo.getId();
+        ToDo oldTodo = getToDo(todoId).get();
+        Long clientId = oldTodo.getClient().getId();
+        toDo.setClient(clientsRepository.findById(clientId).get());
 
         ToDo result = repository.save(toDo);
         URI location = ServletUriComponentsBuilder

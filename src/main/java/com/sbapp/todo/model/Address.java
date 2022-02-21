@@ -1,7 +1,7 @@
 package com.sbapp.todo.model;
 
 
-import lombok.Data;
+import lombok.*;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -17,4 +17,6 @@ public class Address implements Serializable {
     protected String street;
     @Column(name = "house_number")
     protected Integer houseNumber;
+
+
 }
