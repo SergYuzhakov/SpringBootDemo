@@ -8,6 +8,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Getter
@@ -17,7 +18,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Table(name = "todo")
 @ToString(callSuper = true)
-public class ToDo extends BaseToDo {
+public class ToDo extends BaseToDo implements Serializable {
 
     @NotNull
     @NotBlank

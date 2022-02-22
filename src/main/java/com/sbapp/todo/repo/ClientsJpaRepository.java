@@ -2,10 +2,16 @@ package com.sbapp.todo.repo;
 
 import com.sbapp.todo.model.Client;
 import com.sbapp.todo.model.ElAddress;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
-public interface ClientsJpaRepository extends CrudRepository<Client,Long> {
+import java.util.Optional;
 
-    public Client getClientByElAddress(ElAddress address);
+public interface ClientsJpaRepository extends JpaRepository<Client,Long> {
+
+  @Query(value = "SELECT c FROM Client c WHERE c.elAddress.email=lower(:email)")
+  Optional<Client> getClientByEmailAddress(String email);
+
+
 
 }

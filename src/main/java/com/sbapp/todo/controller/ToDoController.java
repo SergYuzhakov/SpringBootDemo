@@ -2,7 +2,6 @@ package com.sbapp.todo.controller;
 
 import com.sbapp.todo.errorhandler.ToDoValidationError;
 import com.sbapp.todo.errorhandler.ToDoValidationErrorBuilder;
-import com.sbapp.todo.model.Address;
 import com.sbapp.todo.model.Client;
 import com.sbapp.todo.model.ElAddress;
 import com.sbapp.todo.model.ToDo;
@@ -35,18 +34,18 @@ public class ToDoController {
 
     @GetMapping("/todo/{id}")
     public ResponseEntity<ToDo> getToDoById(@PathVariable Long id) {
-        if (!getToDo(id).isPresent()) {
+        if (!getToDoFromRepo(id).isPresent()) {
             return notFound();
         }
-        return ResponseEntity.ok(getToDo(id).get());
+        return ResponseEntity.ok(getToDoFromRepo(id).get());
     }
 
     @PatchMapping("/todo/{id}")
     public ResponseEntity<ToDo> setCompleted(@PathVariable Long id) {
-        if (!getToDo(id).isPresent()) {
+        if (!getToDoFromRepo(id).isPresent()) {
             return notFound();
         }
-        ToDo result = getToDo(id).get();
+        ToDo result = getToDoFromRepo(id).get();
         result.setCompleted(true);
         repository.save(result);
         URI location = ServletUriComponentsBuilder
@@ -68,13 +67,13 @@ public class ToDoController {
 
         Client client = toDo.getClient();
         ElAddress address = client.getElAddress();
-        Long clientId = clientsRepository.getClientByElAddress(address).getId();
+        Optional<Client> fromDb = clientsRepository.getClientByEmailAddress(address.getEmail());
 
-        if (clientId != null) {
-            toDo.setClient(clientsRepository.findById(clientId).get());
+        if (fromDb.isPresent()) {
+            toDo.setClient(getClientFromRepo(fromDb.get().getId()));
         } else {
             clientsRepository.save(client);
-            toDo.setClient(clientsRepository.findById(client.getId()).get());
+            toDo.setClient(getClientFromRepo(client.getId()));
         }
 
         ToDo result = repository.save(toDo);
@@ -95,9 +94,9 @@ public class ToDoController {
         }
 
         Long todoId = toDo.getId();
-        ToDo oldTodo = getToDo(todoId).get();
+        ToDo oldTodo = getToDoFromRepo(todoId).get();
         Long clientId = oldTodo.getClient().getId();
-        toDo.setClient(clientsRepository.findById(clientId).get());
+        toDo.setClient(getClientFromRepo(clientId));
 
         ToDo result = repository.save(toDo);
         URI location = ServletUriComponentsBuilder
@@ -110,7 +109,7 @@ public class ToDoController {
 
     @DeleteMapping("/todo/{id}")
     public ResponseEntity<ToDo> deleteToDo(@PathVariable Long id) {
-        if (!getToDo(id).isPresent()) {
+        if (!getToDoFromRepo(id).isPresent()) {
             return notFound();
         }
         repository.deleteById(id);
@@ -130,8 +129,12 @@ public class ToDoController {
         return new ToDoValidationError(exception.getMessage());
     }
 
-    private Optional<ToDo> getToDo(Long id) {
+    private Optional<ToDo> getToDoFromRepo(Long id) {
         return repository.findById(id);
+    }
+
+    private Client getClientFromRepo(Long id){
+        return clientsRepository.findById(id).get();
     }
 
     private ResponseEntity<ToDo> notFound() {

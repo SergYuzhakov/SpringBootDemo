@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 
 @Entity
 @NoArgsConstructor
@@ -16,7 +17,7 @@ import javax.validation.constraints.NotNull;
 @Setter
 @Table(name = "clients", uniqueConstraints = {@UniqueConstraint(columnNames = {"email", "phone"}, name = "client_unique_email_phone_idx")})
 @ToString(callSuper = true)
-public class Client extends NamedBase {
+public class Client extends NamedBase implements Serializable {
 
     @Embedded
     protected Address homeAddress;
