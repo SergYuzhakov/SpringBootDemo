@@ -2,12 +2,13 @@ package com.sbapp.todo.model;
 
 
 import lombok.*;
+import org.springframework.validation.annotation.Validated;
 
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.NotNull;
+import javax.validation.Valid;
 import java.io.Serializable;
 
 @Entity
@@ -23,6 +24,7 @@ public class Client extends NamedBase implements Serializable {
     protected Address homeAddress;
 
     @Embedded
+    @Valid // need to add @Valid annotation on your embedded object if you want to validate the constraints defined in your @Embeddable object:
     protected ElAddress elAddress;
 
 

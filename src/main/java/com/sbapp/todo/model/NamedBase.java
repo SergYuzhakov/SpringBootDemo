@@ -20,8 +20,8 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 public abstract class NamedBase extends BaseToDo {
 
-    @NotBlank
-    @Size(min = 3, max = 100)
+    @NotBlank(message = "Имя должно присутствовать!")
+    @Size(min = 3, max = 100, message = "Имя должно содержать не менее 3-х,но не более 100 символов!")
     @Column(name = "name")
     protected String name;
 

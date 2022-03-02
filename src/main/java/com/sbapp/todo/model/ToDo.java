@@ -6,8 +6,10 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -20,8 +22,9 @@ import java.time.LocalDateTime;
 @ToString(callSuper = true)
 public class ToDo extends BaseToDo implements Serializable {
 
-    @NotNull
-    @NotBlank
+
+    @NotBlank(message = "Description must be!")
+    @Size(min = 10, max = 100, message = "Описание должно содержать не менее 10-и,но не более 100 символов!")
     private String description;
 
     @Column(insertable = true, updatable = false)
@@ -31,9 +34,11 @@ public class ToDo extends BaseToDo implements Serializable {
 
     private boolean completed;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @Valid
+    @ManyToOne(fetch = FetchType.EAGER) // на запрос GET ToDo без клиента ничего не получим если сделаем ленивую инициализацию
     @JoinColumn(name = "clients_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @NotNull(message = "Клиент должен присутсвовать")
     private Client client;
 
 

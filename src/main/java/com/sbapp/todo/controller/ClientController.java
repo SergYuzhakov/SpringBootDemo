@@ -1,7 +1,6 @@
 package com.sbapp.todo.controller;
 
 import com.sbapp.todo.errorhandler.ToDoValidationErrorBuilder;
-import com.sbapp.todo.model.Address;
 import com.sbapp.todo.model.Client;
 import com.sbapp.todo.repo.ClientsJpaRepository;
 import lombok.AllArgsConstructor;
@@ -21,21 +20,22 @@ public class ClientController {
     private ClientsJpaRepository clientsJpaRepository;
 
     @GetMapping("/clients")
-    public ResponseEntity<Iterable<Client>> getClients(){
+    public ResponseEntity<Iterable<Client>> getClients() {
         return ResponseEntity.ok(clientsJpaRepository.findAll());
     }
 
     @GetMapping("/clients/{id}")
     public ResponseEntity<Client> getClientById(@PathVariable Long id) {
-        if (!getClient(id).isPresent()) {
+        if (!getClientFromDb(id).isPresent()) {
             return notFound();
         }
-        return ResponseEntity.ok(getClient(id).get());
+        return ResponseEntity.ok(getClientFromDb(id).get());
     }
+
     @RequestMapping(value = "/clients", method = {RequestMethod.POST,
             RequestMethod.PUT})
     public ResponseEntity<?> createClient(@Valid @RequestBody Client client,
-                                        Errors errors) {
+                                          Errors errors) {
         if (errors.hasErrors()) {
             return ResponseEntity.badRequest().
                     body(ToDoValidationErrorBuilder.fromBindingErrors(errors));
@@ -52,17 +52,18 @@ public class ClientController {
 
     @DeleteMapping("/clients/{id}")
     public ResponseEntity<Client> deleteToDo(@PathVariable Long id) {
-        if (!getClient(id).isPresent()) {
+        if (!getClientFromDb(id).isPresent()) {
             return notFound();
         }
         clientsJpaRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
-    private Optional<Client> getClient(Long id) {
+    private Optional<Client> getClientFromDb(Long id) {
         return clientsJpaRepository.findById(id);
     }
-    private ResponseEntity<Client> notFound(){
+
+    private ResponseEntity<Client> notFound() {
         return ResponseEntity.notFound().build();
     }
 
