@@ -35,7 +35,7 @@ public class ToDo extends BaseToDo implements Serializable {
     private boolean completed;
 
     @Valid
-    @ManyToOne(fetch = FetchType.EAGER) // на запрос GET ToDo без клиента ничего не получим если сделаем ленивую инициализацию
+    @ManyToOne(fetch = FetchType.LAZY) // на запрос GET ToDo без клиента ничего не получим если сделаем ленивую инициализацию
     @JoinColumn(name = "clients_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @NotNull(message = "Клиент должен присутсвовать")

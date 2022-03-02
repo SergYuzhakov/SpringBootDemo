@@ -1,6 +1,8 @@
 message: Just a simple String bean in yaml file!!!!
 
+
 spring:
+
   #To always initialize an SQL database, irrespective of its type, set spring.sql.init.mode to always.
   #Similarly, to disable initialization, set spring.sql.init.mode to never.
   sql:
@@ -13,6 +15,7 @@ spring:
     visibility.setter: none
     visibility.is-getter: none
 
+ # define endpoint spring-data-rest-hal-explorer
   data:
     rest:
       base-path: /api
@@ -23,7 +26,7 @@ spring:
       ddl-auto: update
     open-in-view: false
     generate-ddl: true
-    show-sql: true
+    # show-sql: true
     properties:
       hibernate:
         format_sql: true
@@ -43,3 +46,13 @@ spring:
     username: sa
     password:
 
+# Logging Hibernate
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: debug
+        type:
+          descriptor:
+            sql:
+              BasicBinder: trace

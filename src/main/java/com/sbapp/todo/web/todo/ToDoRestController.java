@@ -31,6 +31,11 @@ public class ToDoRestController {
         return ResponseEntity.ok(toDoService.getToDoById(id).get());
     }
 
+    @GetMapping("/todo/client/{id}")
+    public ResponseEntity<Iterable<ToDo>> findToDosByClient(@PathVariable Long id){
+        return ResponseEntity.ok(toDoService.getAllByClient(id));
+    }
+
     @PatchMapping("/todo/{id}")
     public ResponseEntity<ToDo> setCompleted(@PathVariable Long id) {
         ToDo patchToDo = toDoService.setCompleted(id);

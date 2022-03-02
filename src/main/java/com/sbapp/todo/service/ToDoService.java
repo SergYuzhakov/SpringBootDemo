@@ -20,7 +20,11 @@ public class ToDoService {
     private final ClientsJpaRepository clientsRepository;
 
     public Iterable<ToDo> getAll() {
-        return jpaRepository.findAll();
+        return jpaRepository.findAllToDoWithClients();
+    }
+
+    public Iterable<ToDo> getAllByClient(Long id) {
+        return jpaRepository.findAllToDoByClient(id);
     }
 
     public Optional<ToDo> getToDoById(Long id) {
