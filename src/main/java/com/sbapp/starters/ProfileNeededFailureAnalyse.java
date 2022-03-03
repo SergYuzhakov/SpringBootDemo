@@ -10,8 +10,8 @@ import org.springframework.boot.diagnostics.FailureAnalyzer;
 public class ProfileNeededFailureAnalyse implements FailureAnalyzer {
     @Override
     public FailureAnalysis analyze(Throwable failure) {
-        if(failure.getMessage().contains("Shoud have production profile")){
-            return new FailureAnalysis("Shoud have production profile", "ADD --spring.profile.active=production", failure);
+        if(failure.getMessage().contains("Should have production profile")){
+            return new FailureAnalysis("Should have production profile", "ADD --spring.profile.active=production", failure);
         }
         return null;
     }

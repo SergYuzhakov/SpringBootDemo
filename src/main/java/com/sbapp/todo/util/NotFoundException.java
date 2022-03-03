@@ -1,7 +1,7 @@
 package com.sbapp.todo.util;
 
 public class NotFoundException  extends RuntimeException{
-    public NotFoundException (String messge) {
-        super(messge);
+    public NotFoundException (String message) {
+        super(message);
     }
 }

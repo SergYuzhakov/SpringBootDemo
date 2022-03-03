@@ -3,6 +3,7 @@ package com.sbapp;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,11 +27,11 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.PrintStream;
 
 @RestController
+@Slf4j
 @SpringBootApplication(exclude = {ActiveMQAutoConfiguration.class})
 public class SbappApplication {
-    private static final Logger log = LoggerFactory.getLogger(SbappApplication.class);
-    private MyAppProperties props;
 
+    private MyAppProperties props;
 
     public SbappApplication(MyAppProperties props) {
         this.props = props;
@@ -78,12 +79,10 @@ public class SbappApplication {
         return args -> {
             log.info("##-> CommandLineRunner Implementation");
             log.info("Accessing the Info bean: {}", info);
-            log.info(" > The Server IP is: " + serverIp);
-            log.info(" > App Name: " + props.getName());
-            log.info(" > App Info: " + props.getDescription());
-            for (String arg : args) {
-                log.info(arg);
-            }
+            log.info(" > The Server IP is: {}", serverIp);
+            log.info(" > App Name: {}", props.getName());
+            log.info(" > App Info: {}", props.getDescription());
+
         };
     }
 

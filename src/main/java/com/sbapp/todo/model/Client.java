@@ -28,14 +28,4 @@ public class Client extends NamedBase implements Serializable {
     @Valid
     // need to add @Valid annotation on your embedded object if you want to validate the constraints defined in your @Embeddable object:
     protected ElAddress elAddress;
-
-    @ElementCollection
-    @CollectionTable(name = "clients_to_do_set",
-    joinColumns = @JoinColumn(name = "to_do_set_id"))
-    @OneToMany(fetch = FetchType.LAZY)
-    protected Set<ToDo> toDoSet = new HashSet<>();
-
-
-
-
 }

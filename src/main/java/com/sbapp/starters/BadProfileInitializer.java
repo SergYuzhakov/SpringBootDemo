@@ -16,7 +16,7 @@ public class BadProfileInitializer implements ApplicationContextInitializer<Conf
     public void initialize(ConfigurableApplicationContext applicationContext) {
         log.info("BadProfileInitializer working ...");
         if (applicationContext.getEnvironment().getActiveProfiles().length == 0) {
-            throw new RuntimeException("Shoud have production profile");
+            throw new RuntimeException("Should have production profile");
         }
     }
 }

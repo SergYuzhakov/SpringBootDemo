@@ -35,10 +35,11 @@ public class ToDo extends BaseToDo implements Serializable {
     private boolean completed;
 
     @Valid
-    @ManyToOne(fetch = FetchType.LAZY) // на запрос GET ToDo без клиента ничего не получим если сделаем ленивую инициализацию
+    @ManyToOne(fetch = FetchType.LAZY) // на запрос GET ToDo ничего не получим если сделаем ленивую инициализацию
+    // - одно из решений - JOIN FETCH запрос из репозитория
     @JoinColumn(name = "clients_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @NotNull(message = "Клиент должен присутсвовать")
+    @NotNull(message = "Клиент должен присутствовать")
     private Client client;
 
 

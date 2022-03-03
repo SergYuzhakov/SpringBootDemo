@@ -16,6 +16,7 @@ public interface ToDoJpaRepository extends CrudRepository<ToDo, Long> {
 
     @Query("""
             SELECT t FROM ToDo t
+            JOIN FETCH t.client
             WHERE t.client.id=:id
                                     """)
     Iterable<ToDo> findAllToDoByClient(@Param("id") Long id);
