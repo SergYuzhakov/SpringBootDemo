@@ -1,8 +1,9 @@
-package com.sbapp.todo.controller;
+package com.sbapp.todo.web.client;
 
 import com.sbapp.todo.errorhandler.ToDoValidationErrorBuilder;
 import com.sbapp.todo.model.Client;
 import com.sbapp.todo.repo.ClientsJpaRepository;
+import com.sbapp.todo.service.ClientService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
@@ -16,20 +17,17 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api")
 @AllArgsConstructor
-public class ClientController {
-    private ClientsJpaRepository clientsJpaRepository;
+public class ClientRestController {
+    private ClientService clientService;
 
     @GetMapping("/clients")
     public ResponseEntity<Iterable<Client>> getClients() {
-        return ResponseEntity.ok(clientsJpaRepository.findAll());
+        return ResponseEntity.ok(clientService.getAllClients());
     }
 
     @GetMapping("/clients/{id}")
     public ResponseEntity<Client> getClientById(@PathVariable Long id) {
-        if (!getClientFromDb(id).isPresent()) {
-            return notFound();
-        }
-        return ResponseEntity.ok(getClientFromDb(id).get());
+        return ResponseEntity.ok(clientService.getClientById(id).get());
     }
 
     @RequestMapping(value = "/clients", method = {RequestMethod.POST,
@@ -40,7 +38,7 @@ public class ClientController {
             return ResponseEntity.badRequest().
                     body(ToDoValidationErrorBuilder.fromBindingErrors(errors));
         }
-        Client result = clientsJpaRepository.save(client);
+        Client result = clientService.createClient(client);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -51,20 +49,10 @@ public class ClientController {
     }
 
     @DeleteMapping("/clients/{id}")
-    public ResponseEntity<Client> deleteToDo(@PathVariable Long id) {
-        if (!getClientFromDb(id).isPresent()) {
-            return notFound();
-        }
-        clientsJpaRepository.deleteById(id);
+    public ResponseEntity<Client> deleteClient(@PathVariable Long id) {
+        clientService.deleteClientById(id);
         return ResponseEntity.noContent().build();
     }
 
-    private Optional<Client> getClientFromDb(Long id) {
-        return clientsJpaRepository.findById(id);
-    }
-
-    private ResponseEntity<Client> notFound() {
-        return ResponseEntity.notFound().build();
-    }
 
 }

@@ -42,20 +42,11 @@ public class ToDoService {
         ElAddress address = client.getElAddress();
         Optional<Client> fromDb = clientsRepository.getClientByEmailAddress(address.getEmail());
         if (fromDb.isPresent()) {
-            toDo.setClient(clientsRepository.findById(Objects.requireNonNull(fromDb.get().getId())).get());
+            toDo.setClient(fromDb.get());
         } else {
-            clientsRepository.save(client);
-            assert client.getId() != null;
-            toDo.setClient(clientsRepository.findById(client.getId()).get());
+            Long newId = clientsRepository.save(client).getId();
+            toDo.setClient(clientsRepository.findById(newId).get());
         }
-        return jpaRepository.save(toDo);
-    }
-
-    public ToDo updateToDo(ToDo toDo) {
-        Long todoId = toDo.getId();
-        ToDo oldTodo = getToDoById(todoId).get();
-        Long clientId = oldTodo.getClient().getId();
-        toDo.setClient(clientsRepository.findById(clientId).get());
         return jpaRepository.save(toDo);
     }
 
