@@ -7,10 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import javax.persistence.*;
 import javax.validation.Valid;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @NoArgsConstructor
@@ -28,4 +25,18 @@ public class Client extends NamedBase implements Serializable {
     @Valid
     // need to add @Valid annotation on your embedded object if you want to validate the constraints defined in your @Embeddable object:
     protected ElAddress elAddress;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Client client = (Client) o;
+        return homeAddress.equals(client.homeAddress) && elAddress.equals(client.elAddress);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), homeAddress, elAddress);
+    }
 }

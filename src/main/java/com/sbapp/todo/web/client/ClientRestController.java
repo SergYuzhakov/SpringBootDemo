@@ -30,8 +30,26 @@ public class ClientRestController {
         return ResponseEntity.ok(clientService.getClientById(id).get());
     }
 
-    @RequestMapping(value = "/clients", method = {RequestMethod.POST,
-            RequestMethod.PUT})
+    @RequestMapping(value = "/clients/{id}", method = RequestMethod.PUT)
+    public ResponseEntity<?> updateClient(@Valid @RequestBody Client client,
+                                          @PathVariable Long id,
+                                          Errors errors) {
+        if (errors.hasErrors()) {
+            return ResponseEntity.badRequest().
+                    body(ToDoValidationErrorBuilder.fromBindingErrors(errors));
+        }
+        Client updateClient = clientService.updateClient(client, id);
+
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .buildAndExpand(updateClient.getId())
+                .toUri();
+        return ResponseEntity.ok()
+                .header("Location", location.toString())
+                .build();
+    }
+
+    @RequestMapping(value = "/clients", method = {RequestMethod.POST})
     public ResponseEntity<?> createClient(@Valid @RequestBody Client client,
                                           Errors errors) {
         if (errors.hasErrors()) {

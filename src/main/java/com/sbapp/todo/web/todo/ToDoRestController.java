@@ -1,10 +1,12 @@
 package com.sbapp.todo.web.todo;
 
+import com.sbapp.todo.dto.ToDoDto;
 import com.sbapp.todo.errorhandler.ToDoValidationErrorBuilder;
 import com.sbapp.todo.model.ToDo;
 import com.sbapp.todo.service.ToDoService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
@@ -36,9 +38,20 @@ public class ToDoRestController {
         return ResponseEntity.ok(toDoService.getAllByClient(id));
     }
 
-    @PatchMapping("/todo/{id}")
-    public ResponseEntity<ToDo> setCompleted(@PathVariable Long id) {
-        ToDo patchToDo = toDoService.setCompleted(id);
+    @GetMapping("/todo/client/")
+    public ResponseEntity<Iterable<ToDoDto>> findToDosByClientName(@RequestParam("partName") String partName) {
+        return ResponseEntity.ok(toDoService.getAllToDoDtoByClientName(partName));
+    }
+
+    @RequestMapping(value = "/todo/{id}", method = RequestMethod.PUT)
+    public ResponseEntity<?> setCompleted(@Valid @RequestBody ToDo toDo,
+                                          @PathVariable Long id,
+                                          Errors errors) {
+        if (errors.hasErrors()) {
+            return ResponseEntity.badRequest().
+                    body(ToDoValidationErrorBuilder.fromBindingErrors(errors));
+        }
+        ToDo patchToDo = toDoService.updateToDo(toDo, id);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .buildAndExpand(patchToDo.getId())
@@ -48,8 +61,7 @@ public class ToDoRestController {
                 .build();
     }
 
-    @RequestMapping(value = "/todo", method = {RequestMethod.POST,
-            RequestMethod.PUT})
+    @RequestMapping(value = "/todo", method = {RequestMethod.POST})
     public ResponseEntity<?> createToDo(@Valid @RequestBody ToDo toDo,
                                         Errors errors) {
         if (errors.hasErrors()) {

@@ -1,7 +1,9 @@
 package com.sbapp.todo.service;
 
+import com.sbapp.todo.dto.ToDoDto;
 import com.sbapp.todo.model.Client;
 import com.sbapp.todo.model.ElAddress;
+import com.sbapp.todo.util.DtoUtil;
 import com.sbapp.todo.util.ValidationUtil;
 import com.sbapp.todo.model.ToDo;
 import com.sbapp.todo.repo.ClientsJpaRepository;
@@ -9,6 +11,8 @@ import com.sbapp.todo.repo.ToDoJpaRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -31,12 +35,19 @@ public class ToDoService {
         return ValidationUtil.checkObjectIsPresent(jpaRepository.findById(id));
     }
 
-    public ToDo setCompleted(Long id) {
-        ToDo result = getToDoById(id).get();
-        result.setCompleted(true);
-        return jpaRepository.save(result);
+    public Iterable<ToDoDto> getAllToDoDtoByClientName(String partName) {
+        return DtoUtil.createToDoDtoFromToDo((Collection<ToDo>) jpaRepository.findAllToDoByClientNameLike(partName));
     }
 
+    @Transactional
+    public ToDo updateToDo(ToDo toDo, Long id) {
+        ToDo oldTodo = getToDoById(id).get();
+        oldTodo.setCompleted(toDo.isCompleted());
+        oldTodo.setDescription(toDo.getDescription());
+        return jpaRepository.save(oldTodo);
+    }
+
+    @Transactional
     public ToDo createToDo(ToDo toDo) {
         Client client = toDo.getClient();
         ElAddress address = client.getElAddress();
@@ -50,6 +61,7 @@ public class ToDoService {
         return jpaRepository.save(toDo);
     }
 
+    @Transactional
     public void deleteToDoById(Long id) {
         jpaRepository.delete(getToDoById(id).get());
     }

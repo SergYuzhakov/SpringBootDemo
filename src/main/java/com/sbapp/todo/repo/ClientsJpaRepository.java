@@ -9,11 +9,10 @@ import java.util.Optional;
 public interface ClientsJpaRepository extends JpaRepository<Client, Long> {
 
     @Query("""
-              SELECT c
-              FROM Client c
-              WHERE c.elAddress.email=lower(:email)
-              """)
+            SELECT c
+            FROM Client c
+            WHERE c.elAddress.email=lower(:email)
+            """)
     Optional<Client> getClientByEmailAddress(String email);
-
 
 }

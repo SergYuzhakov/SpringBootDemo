@@ -21,4 +21,11 @@ public interface ToDoJpaRepository extends CrudRepository<ToDo, Long> {
                                     """)
     Iterable<ToDo> findAllToDoByClient(@Param("id") Long id);
 
+    @Query("""
+            SELECT t FROM ToDo t
+            JOIN FETCH t.client
+            WHERE LOWER(t.client.name) LIKE LOWER(CONCAT('%', :partName, '%')) 
+                                    """)
+    Iterable<ToDo> findAllToDoByClientNameLike(@Param("partName") String partName);
+
 }
