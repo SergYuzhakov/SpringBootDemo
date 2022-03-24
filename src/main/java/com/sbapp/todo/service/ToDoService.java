@@ -8,6 +8,8 @@ import com.sbapp.todo.util.ValidationUtil;
 import com.sbapp.todo.model.ToDo;
 import com.sbapp.todo.repo.ClientsJpaRepository;
 import com.sbapp.todo.repo.ToDoJpaRepository;
+import com.sbapp.todo.util.exception.NotFoundException;
+import com.sbapp.todo.util.exception.SqlUniqueConstraintException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -50,25 +52,30 @@ public class ToDoService {
     @Transactional
     public ToDo createToDo(ToDo toDo) {
         Client client = toDo.getClient();
-        ElAddress address = client.getElAddress();
-        Optional<Client> fromDb = clientsRepository.getClientByEmailAddress(address.getEmail());
+        Long clientId = null;
+        // здесь нужно идентифицировать клиента из базы по email
+        Optional<Client> fromDb = clientsRepository.getClientByEmailAddress(client.getElAddress().getEmail());
         if (fromDb.isPresent()) {
             toDo.setClient(fromDb.get());
         } else {
-            Long newId = clientsRepository.save(client).getId();
-            toDo.setClient(clientsRepository.findById(newId).get());
+            try {
+                clientId = clientsRepository.save(toDo.getClient()).getId();
+            } catch (Exception e) {
+                throw new SqlUniqueConstraintException("Duplicate email or phone number");
+            }
+            toDo.setClient(clientsRepository.findById(clientId).get());
         }
         return jpaRepository.save(toDo);
+
     }
 
     @Transactional
     public void deleteToDoById(Long id) {
-        jpaRepository.delete(getToDoById(id).get());
-    }
-
-    public void deleteAllToDo() {
-        Iterable<ToDo> toDos = getAll();
-        jpaRepository.deleteAll(toDos);
+        try {
+            jpaRepository.deleteById(id);
+        }catch (Exception e){
+            throw new NotFoundException(String.format("ToDo with id = %d not found", id));
+        }
     }
 
 }

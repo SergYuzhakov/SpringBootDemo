@@ -1,14 +1,11 @@
 package com.sbapp.todo.web.todo;
 
 import com.sbapp.todo.dto.ToDoDto;
-import com.sbapp.todo.errorhandler.ToDoValidationErrorBuilder;
 import com.sbapp.todo.model.ToDo;
 import com.sbapp.todo.service.ToDoService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -38,19 +35,14 @@ public class ToDoRestController {
         return ResponseEntity.ok(toDoService.getAllByClient(id));
     }
 
-    @GetMapping("/todo/client/")
+    @GetMapping("/todo/client/search")
     public ResponseEntity<Iterable<ToDoDto>> findToDosByClientName(@RequestParam("partName") String partName) {
         return ResponseEntity.ok(toDoService.getAllToDoDtoByClientName(partName));
     }
 
     @RequestMapping(value = "/todo/{id}", method = RequestMethod.PUT)
     public ResponseEntity<?> setCompleted(@Valid @RequestBody ToDo toDo,
-                                          @PathVariable Long id,
-                                          Errors errors) {
-        if (errors.hasErrors()) {
-            return ResponseEntity.badRequest().
-                    body(ToDoValidationErrorBuilder.fromBindingErrors(errors));
-        }
+                                          @PathVariable Long id) {
         ToDo patchToDo = toDoService.updateToDo(toDo, id);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -62,12 +54,8 @@ public class ToDoRestController {
     }
 
     @RequestMapping(value = "/todo", method = {RequestMethod.POST})
-    public ResponseEntity<?> createToDo(@Valid @RequestBody ToDo toDo,
-                                        Errors errors) {
-        if (errors.hasErrors()) {
-            return ResponseEntity.badRequest().
-                    body(ToDoValidationErrorBuilder.fromBindingErrors(errors));
-        }
+    public ResponseEntity<?> createToDo(@Valid @RequestBody ToDo toDo) {
+
         ToDo result = toDoService.createToDo(toDo);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()

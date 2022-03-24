@@ -1,18 +1,14 @@
 package com.sbapp.todo.web.client;
 
-import com.sbapp.todo.errorhandler.ToDoValidationErrorBuilder;
 import com.sbapp.todo.model.Client;
-import com.sbapp.todo.repo.ClientsJpaRepository;
 import com.sbapp.todo.service.ClientService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
 import java.net.URI;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
@@ -32,12 +28,7 @@ public class ClientRestController {
 
     @RequestMapping(value = "/clients/{id}", method = RequestMethod.PUT)
     public ResponseEntity<?> updateClient(@Valid @RequestBody Client client,
-                                          @PathVariable Long id,
-                                          Errors errors) {
-        if (errors.hasErrors()) {
-            return ResponseEntity.badRequest().
-                    body(ToDoValidationErrorBuilder.fromBindingErrors(errors));
-        }
+                                          @PathVariable Long id) {
         Client updateClient = clientService.updateClient(client, id);
 
         URI location = ServletUriComponentsBuilder
@@ -50,12 +41,7 @@ public class ClientRestController {
     }
 
     @RequestMapping(value = "/clients", method = {RequestMethod.POST})
-    public ResponseEntity<?> createClient(@Valid @RequestBody Client client,
-                                          Errors errors) {
-        if (errors.hasErrors()) {
-            return ResponseEntity.badRequest().
-                    body(ToDoValidationErrorBuilder.fromBindingErrors(errors));
-        }
+    public ResponseEntity<?> createClient(@Valid @RequestBody Client client) {
         Client result = clientService.createClient(client);
 
         URI location = ServletUriComponentsBuilder

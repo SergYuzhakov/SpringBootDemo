@@ -56,3 +56,10 @@ logging:
           descriptor:
             sql:
               BasicBinder: trace
+#Using these Spring Boot server properties in our application.yml we can alter the error response to some extent.
+server:
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: on_param
+    include-exception: false

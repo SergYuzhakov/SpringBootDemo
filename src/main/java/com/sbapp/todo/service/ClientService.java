@@ -1,12 +1,10 @@
 package com.sbapp.todo.service;
 
-import com.sbapp.todo.model.Address;
 import com.sbapp.todo.model.Client;
-import com.sbapp.todo.model.ElAddress;
-import com.sbapp.todo.model.ToDo;
 import com.sbapp.todo.repo.ClientsJpaRepository;
-import com.sbapp.todo.util.NotFoundException;
 import com.sbapp.todo.util.ValidationUtil;
+import com.sbapp.todo.util.exception.NotFoundException;
+import com.sbapp.todo.util.exception.SqlUniqueConstraintException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -32,23 +30,22 @@ public class ClientService {
         oldClient.setName(client.getName());
         oldClient.setHomeAddress(client.getHomeAddress());
         oldClient.setElAddress(client.getElAddress());
+
         return clientsRepository.save(oldClient);
     }
 
     public Client createClient(Client client) {
-        Optional<Client> fromDb = clientsRepository.getClientByEmailAddress(client.getElAddress().getEmail());
-        if(fromDb.isPresent()){
-            log.info("Client already exist with id: {}", fromDb.get().getId());
-            return fromDb.get();
+        try {
+            return clientsRepository.save(client);
+        } catch (Exception e) {
+            throw new SqlUniqueConstraintException("Client with this email and phone already exist!");
         }
-        return clientsRepository.save(client);
-
     }
 
     public void deleteClientById(Long id) {
-        if (getClientById(id).isPresent()) {
+        try {
             clientsRepository.deleteById(id);
-        } else {
+        } catch (Exception e) {
             throw new NotFoundException(String.format("Client with id = %d not found", id));
         }
     }
