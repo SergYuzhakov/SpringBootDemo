@@ -1,6 +1,7 @@
 package com.sbapp.todo.model;
 
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import org.springframework.validation.annotation.Validated;
 
@@ -16,6 +17,7 @@ import java.util.*;
 @Setter
 @Table(name = "clients", uniqueConstraints = {@UniqueConstraint(columnNames = {"email", "phone"}, name = "client_unique_email_phone_idx")})
 @ToString(callSuper = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Client extends NamedBase implements Serializable {
 
     @Embedded

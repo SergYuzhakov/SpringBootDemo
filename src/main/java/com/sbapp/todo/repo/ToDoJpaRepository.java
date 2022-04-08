@@ -3,9 +3,21 @@ package com.sbapp.todo.repo;
 import com.sbapp.todo.model.ToDo;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
-public interface ToDoJpaRepository extends CrudRepository<ToDo, Long> {
+import java.util.Optional;
+
+public interface ToDoJpaRepository extends PagingAndSortingRepository<ToDo, Long> {
+
+    @Query("""
+            SELECT t FROM ToDo t
+            JOIN FETCH t.client
+            WHERE t.id=:id
+            """
+    )
+    Optional<ToDo> findToDoById(@Param("id") Long id);
+
 
     @Query("""
             SELECT t FROM ToDo t

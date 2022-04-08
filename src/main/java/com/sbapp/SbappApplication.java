@@ -30,23 +30,27 @@ import java.io.PrintStream;
 @Slf4j
 @SpringBootApplication(exclude = {ActiveMQAutoConfiguration.class})
 public class SbappApplication {
-
+/*
     private MyAppProperties props;
 
     public SbappApplication(MyAppProperties props) {
         this.props = props;
     }
 
+ */
+
     public static void main(String[] args) {
 
         SpringApplication app = new SpringApplication(SbappApplication.class);
-
+/*
         app.setBanner(new Banner() {
             @Override
             public void printBanner(Environment environment, Class<?> sourceClass, PrintStream out) {
                 out.print("\n\n\tThis is my own banner!\n\n".toUpperCase());
             }
         });
+
+ */
 
         app.run(args);
 
@@ -67,7 +71,7 @@ public class SbappApplication {
          */
 
     }
-
+/*
     @Value("${message}")
     String info;
 
@@ -100,5 +104,7 @@ public class SbappApplication {
     public String hello() {
         return "Hello World!";
     }
+
+ */
 
 }
