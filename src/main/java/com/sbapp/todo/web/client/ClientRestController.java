@@ -5,6 +5,7 @@ import com.sbapp.todo.model.Client;
 import com.sbapp.todo.service.ClientService;
 import com.sbapp.todo.util.DtoUtil;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,7 @@ import java.net.URI;
 @Slf4j
 public class ClientRestController {
     private ClientService clientService;
+    private DtoUtil dtoUtil;
 
     @GetMapping("/clients")
     public ResponseEntity<Iterable<Client>> getClients() {
@@ -36,7 +38,7 @@ public class ClientRestController {
             RequestMethod.PUT, RequestMethod.PATCH})
     public ResponseEntity<?> updateClient(@Valid @RequestBody Client client) {
         Client updateClient = clientService.updateClient(client);
-        ClientDto clientDto = DtoUtil.createDtoClientFromClient(updateClient);
+        ClientDto clientDto = dtoUtil.createClientDto(updateClient);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")

@@ -8,9 +8,8 @@ import com.sbapp.todo.model.ToDo;
 import com.sbapp.todo.repo.ClientsJpaRepository;
 import com.sbapp.todo.repo.ToDoJpaRepository;
 import com.sbapp.todo.util.DtoUtil;
-import com.sbapp.todo.util.ValidationUtil;
 import com.sbapp.todo.util.exception.JsonMappingHandlerException;
-import com.sbapp.todo.util.exception.NotFoundException;
+import com.sbapp.todo.util.exception.NoSuchElementFoundException;
 import com.sbapp.todo.util.exception.SqlUniqueConstraintException;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,7 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -32,39 +30,44 @@ public class ToDoService {
     private final ClientsJpaRepository clientsRepository;
     private ObjectMapper objectMapper;
 
-    public Iterable<ToDo> getAll() {
-        return jpaRepository.findAllToDoWithClients();
+    private DtoUtil dtoUtil;
+
+    public List<ToDoDto> getAll(String filter) {
+        boolean isFiltered = !filter.trim().isEmpty();
+        return dtoUtil.ToDoToDto(jpaRepository
+                .findAllToDosWithClients(isFiltered, filter));
     }
 
-    public Page<ToDoDto> findAllToDoDto(Pageable pageable){
-        List<ToDo> toDoList = new ArrayList<>();
-        getAll().forEach(toDoList::add);
-        List<ToDoDto> dtoList = DtoUtil.createToDoDtoFromToDo(toDoList);
+    public Page<ToDoDto> findAllToDoDto(Pageable pageable, String filter) {
+        List<ToDoDto> dtoList = getAll(filter);
 
         final int startPage = (int) pageable.getOffset();
-        final int endPage = Math.min((startPage + pageable.getPageSize()),dtoList.size());
+        final int endPage = Math.min((startPage + pageable.getPageSize()), dtoList.size());
 
-        return new PageImpl<>(dtoList.subList(startPage, endPage),pageable,dtoList.size());
-
-
-
+        return new PageImpl<>(dtoList.subList(startPage, endPage), pageable, dtoList.size());
     }
 
-    public Iterable<ToDo> getAllByClient(Long id) {
-        return jpaRepository.findAllToDoByClient(id);
+    public Collection<ToDoDto> getAllByClient(Long id) {
+        return dtoUtil.ToDoToDto(jpaRepository
+                .findAllToDosByClient(id));
     }
 
     public Optional<ToDo> getToDoById(Long id) {
-        return ValidationUtil.checkObjectIsPresent(jpaRepository.findToDoById(id));
+        return Optional.ofNullable(jpaRepository
+                .findToDoById(id).orElseThrow(() ->
+                        new NoSuchElementFoundException(
+                                String.format("ToDo with id = %d not found...", id))));
     }
 
     public Iterable<ToDoDto> getAllToDoDtoByClientName(String partName) {
-        return DtoUtil.createToDoDtoFromToDo((Collection<ToDo>) jpaRepository.findAllToDoByClientNameLike(partName));
+        boolean isPartName = !partName.trim().isEmpty();
+        return dtoUtil.ToDoToDto(jpaRepository
+                .findAllToDosByClientNameLike(isPartName,partName));
     }
 
     @Transactional
-    public ToDo updateToDo(ToDo toDo)  {
-        if(!toDo.isNew()) {
+    public ToDo updateToDo(ToDo toDo) {
+        if (!toDo.isNew()) {
             ToDo oldTodo = getToDoById(toDo.getId()).get();
             Client oldToDoClient = oldTodo.getClient();
             toDo.setClient(oldToDoClient);
@@ -74,13 +77,16 @@ public class ToDoService {
                 throw new JsonMappingHandlerException("Json mapping error(s).");
             }
             return jpaRepository.save(oldTodo);
-        }else {
+        } else {
             Client client = toDo.getClient();
             Long clientId = null;
-            // здесь нужно идентифицировать клиента из базы по email
-            Optional<Client> fromDb = clientsRepository.getClientByEmailAddress(client.getElAddress().getEmail());
-            if (fromDb.isPresent()) {
-                toDo.setClient(fromDb.get());
+            String email = client.getElAddress().getEmail().toLowerCase();
+            // здесь нужно идентифицировать клиента из базы по email (либо по номеру телефона)
+            if (clientsRepository.existsClientByElAddress_Email(email)) {
+                Optional<Client> fromDb = clientsRepository.getClientByEmailAddress(client.getElAddress().getEmail());
+                if (fromDb.isPresent()) {
+                    toDo.setClient(fromDb.get());
+                }
             } else {
                 try {
                     clientId = clientsRepository.save(toDo.getClient()).getId();
@@ -95,11 +101,8 @@ public class ToDoService {
 
     @Transactional
     public void deleteToDoById(Long id) {
-        try {
+        if (getToDoById(id).isPresent())
             jpaRepository.deleteById(id);
-        } catch (Exception e) {
-            throw new NotFoundException(String.format("ToDo with id = %d not found", id));
-        }
     }
 
 }

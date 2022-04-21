@@ -15,4 +15,5 @@ public interface ClientsJpaRepository extends JpaRepository<Client, Long> {
             """)
     Optional<Client> getClientByEmailAddress(String email);
 
+    boolean existsClientByElAddress_Email(String email);
 }

@@ -1,7 +1,9 @@
 message: Just a simple String bean in yaml file!!!!
 
 
+
 spring:
+
 
   #To always initialize an SQL database, irrespective of its type, set spring.sql.init.mode to always.
   #Similarly, to disable initialization, set spring.sql.init.mode to never.

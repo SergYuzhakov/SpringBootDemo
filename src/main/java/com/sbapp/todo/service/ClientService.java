@@ -6,6 +6,7 @@ import com.sbapp.todo.model.Client;
 import com.sbapp.todo.repo.ClientsJpaRepository;
 import com.sbapp.todo.util.ValidationUtil;
 import com.sbapp.todo.util.exception.JsonMappingHandlerException;
+import com.sbapp.todo.util.exception.NoSuchElementFoundException;
 import com.sbapp.todo.util.exception.NotFoundException;
 import com.sbapp.todo.util.exception.SqlUniqueConstraintException;
 import lombok.AllArgsConstructor;
@@ -26,7 +27,10 @@ public class ClientService {
     }
 
     public Optional<Client> getClientById(Long id) {
-        return ValidationUtil.checkObjectIsPresent(clientsRepository.findById(id));
+        return Optional.ofNullable(clientsRepository.findById(id)
+                .orElseThrow(() ->
+                        new NoSuchElementFoundException(
+                                String.format("ToDo with id = %d not found...", id))));
     }
 
     public Client updateClient(Client client) {
@@ -50,11 +54,8 @@ public class ClientService {
     }
 
     public void deleteClientById(Long id) {
-        try {
+        if (getClientById(id).isPresent())
             clientsRepository.deleteById(id);
-        } catch (Exception e) {
-            throw new NotFoundException(String.format("Client with id = %d not found", id));
-        }
     }
 
 }

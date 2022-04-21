@@ -6,6 +6,7 @@ import com.sbapp.todo.model.ElAddress;
 
 public class ClientUtil {
     private static final Client client = new Client();
+    private static final Client clientWithId = new Client();
     private static final ElAddress elAddress = new ElAddress();
     private static final Address address = new Address();
 
@@ -14,6 +15,13 @@ public class ClientUtil {
         client.setHomeAddress(getAddress());
         client.setElAddress(getElAddress());
         return client;
+    }
+    public static Client getClientWithIdTest(){
+        clientWithId.setName("Jon");
+        clientWithId.setHomeAddress(getAddress());
+        clientWithId.setElAddress(getElAddress());
+        clientWithId.setId(2L);
+        return clientWithId;
     }
 
     public static Address getAddress(){
@@ -27,5 +35,6 @@ public class ClientUtil {
         elAddress.setPhoneNumber("1234567891");
         return elAddress;
     }
+
 
 }

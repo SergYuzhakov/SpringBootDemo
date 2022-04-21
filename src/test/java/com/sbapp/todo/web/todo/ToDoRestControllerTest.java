@@ -47,23 +47,17 @@ class ToDoRestControllerTest {
     @MockBean
     private ToDoService service;
 
-    private Iterable<ToDo> testToDo;
+    private ToDo testToDo;
     private ToDo testToDoWithId;
     private ToDo invalidToDo;
-    private Optional<ToDo> optionalToDo;
-    private List<ToDo> toDoList;
 
 
     @BeforeEach
     void setUp() throws JsonProcessingException {
-        testToDo = ToDoUtil.getToDoTest();
-        log.info("Test TODO: {}", testToDo);
-        String test = objectMapper.writeValueAsString(testToDo.iterator().next());
-        testToDoWithId = objectMapper.readValue(test, ToDo.class);
-        testToDoWithId.setId(1L);
+        testToDo = ToDoUtil.getToDosTest().iterator().next();
+        testToDoWithId = ToDoUtil.getToDoWithIdTest();
         invalidToDo = ToDoUtil.getInvalidToDo();
-        toDoList = List.of(testToDoWithId);
-        optionalToDo = Optional.of(testToDoWithId);
+
 
     }
 
@@ -74,8 +68,8 @@ class ToDoRestControllerTest {
     @Test
     @DisplayName("GET ToDos")
     void getToDos() throws Exception {
-        doReturn(toDoList).when(service).getAll();
-        this.mvc.perform(get("/api/todo")
+        doReturn(List.of(testToDoWithId)).when(service).getAll("");
+        this.mvc.perform(get("/api/todo?filter=")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
@@ -87,7 +81,7 @@ class ToDoRestControllerTest {
     @DisplayName("Get ToDo by Id=1")
     void getToDoById() throws Exception {
         String testContent = objectMapper.writeValueAsString(testToDoWithId);
-        doReturn(optionalToDo).when(service).getToDoById(1L);
+        doReturn(Optional.of(testToDoWithId)).when(service).getToDoById(1L);
         this.mvc.perform(get("/api/todo/{id}", 1L)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -141,7 +135,11 @@ class ToDoRestControllerTest {
                         .content(objectMapper.writeValueAsString(testToDoWithId)))
                 .andDo(print())
                 .andExpect(status().isCreated())
-                .andExpect(header().string(HttpHeaders.LOCATION, "http://localhost/api/todo"));
+                .andExpect(header().string(HttpHeaders.LOCATION, "http://localhost/api/todo"))
+                .andExpect(jsonPath("id", is(1)))
+                .andExpect(jsonPath("description", is("New Description")))
+                .andExpect(jsonPath("completed", is(false)));
+
     }
 
     @Test

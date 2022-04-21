@@ -9,6 +9,7 @@ import com.sbapp.todo.ToDoUtil;
 import com.sbapp.todo.model.Client;
 import com.sbapp.todo.repo.ClientsJpaRepository;
 import com.sbapp.todo.service.ClientService;
+import com.sbapp.todo.util.DtoUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = ClientRestController.class)
+@WebMvcTest(controllers = {ClientRestController.class, DtoUtil.class})
 @AutoConfigureMockMvc
 @Slf4j
 class ClientRestControllerTest {
@@ -59,7 +60,6 @@ class ClientRestControllerTest {
     }
 
     @Test
-    @TimeLogger
     void createClient() throws Exception {
         doReturn(clientWithId).when(clientService).updateClient(any());
         log.info("Client: {}", jsonClient);

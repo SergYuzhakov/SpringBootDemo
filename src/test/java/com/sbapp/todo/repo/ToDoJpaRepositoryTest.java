@@ -6,15 +6,16 @@ import com.sbapp.todo.model.Client;
 import com.sbapp.todo.model.ToDo;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.DirtiesContext;
 
-import java.util.List;
 import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 
 @DataJpaTest
@@ -23,18 +24,19 @@ import java.util.Optional;
 class ToDoJpaRepositoryTest {
 
     @Autowired
-    ToDoJpaRepository repository;
+    ToDoJpaRepository toDoRepository;
 
     @Autowired
-    ClientsJpaRepository clientsJpaRepository;
+    ClientsJpaRepository clientRepository;
 
-    private Iterable<ToDo> toDO = ToDoUtil.getToDoTest();
+    private Iterable<ToDo> toDos = ToDoUtil.getToDosTest();
     private Client client = ClientUtil.getClientTest();
 
     @BeforeEach
     void setUp() {
-        clientsJpaRepository.save(client);
-        toDO.forEach(t-> repository.save(t));
+        clientRepository.save(client);
+        toDoRepository.saveAll(toDos);
+
     }
 
     @AfterEach
@@ -44,38 +46,51 @@ class ToDoJpaRepositoryTest {
 
     @Test
     void findToDoById() {
+        Optional<ToDo> toDoFromDb = this.toDoRepository.findToDoById(1001L);
+        log.info("Restored from DB: {}", toDoFromDb);
+        assertEquals("Read a book", toDoFromDb.get().getDescription());
 
-        Optional<ToDo> fromDb = repository.findToDoById(1001L);
-        log.info(fromDb.toString());
-        Assertions.assertTrue(fromDb.isPresent());
     }
 
     @Test
     void findAllToDoWithClients() {
-        Iterable<ToDo> allToDos = repository.findAllToDoWithClients();
-        Assertions.assertTrue(allToDos.iterator().next().getDescription().equals("Read a book"));
+        Iterable<ToDo> toDos = this.toDoRepository.findAllToDosWithClients(false, "");
+        assertEquals(2, toDos.spliterator().estimateSize());
+        assertEquals("Read a book", toDos.iterator().next().getDescription());
+
     }
 
     @Test
     void findAllToDoByClient() {
+        Iterable<ToDo> toDos = this.toDoRepository.findAllToDosByClient(1000L);
+        assertEquals(2, toDos.spliterator().estimateSize());
+        assertEquals("Read a book", toDos.iterator().next().getDescription());
+
     }
 
     @Test
     void findAllToDoByClientNameLike() {
+        Iterable<ToDo> toDos = this.toDoRepository.findAllToDosByClientNameLike(true,"jo");
+        assertEquals(2, toDos.spliterator().estimateSize());
+        assertEquals("Jon", toDos.iterator().next().getClient().getName());
+
     }
+
     @Test
-    void deleteToDoById(){
-        repository.deleteById(toDO.iterator().next().getId());
-        Iterable<ToDo> allToDos = repository.findAllToDoWithClients();
-        Assertions.assertFalse(allToDos.iterator().hasNext());
+    void deleteToDoById() {
+        toDoRepository.deleteById(1001L);
+        assertFalse(toDoRepository.existsById(1001L));
+
     }
+
     @Test
     void deleteClientById() {
-        clientsJpaRepository.deleteById(client.id());
-        Iterable<ToDo> allToDos = repository.findAllToDoWithClients();
-        List<Client> allClients = clientsJpaRepository.findAll();
-        Assertions.assertTrue(allClients.isEmpty());
-        Assertions.assertFalse(allToDos.iterator().hasNext());
+        clientRepository.deleteById(1000L);
+        Iterable<ToDo> toDos = this.toDoRepository.findAllToDosByClient(1000L);
+        assertEquals(0, toDos.spliterator().estimateSize());
+        assertFalse(toDoRepository.existsById(1001L));
+        assertFalse(clientRepository.existsById(1000L));
+
 
     }
 }

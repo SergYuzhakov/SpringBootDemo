@@ -4,28 +4,46 @@ import com.sbapp.todo.dto.ClientDto;
 import com.sbapp.todo.dto.ToDoDto;
 import com.sbapp.todo.model.Client;
 import com.sbapp.todo.model.ToDo;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Component
 public class DtoUtil {
 
-    public static List<ToDoDto> createToDoDtoFromToDo(Collection<ToDo> toDos) {
-        return toDos.stream().map(t -> new ToDoDto(t.getDescription(),
-                        t.getCreated(),
-                        t.getModified(),
-                        t.isCompleted(),
-                        t.getClient().getName()))
+    public ToDoDto createToDoDto(ToDo entity) {
+        return ToDoDto.builder()
+                .id(entity.id())
+                .description(entity.getDescription())
+                .createdTodo(entity.getCreated())
+                .modifiedTodo(entity.getModified())
+                .completed(entity.isCompleted())
+                .clientName(entity.getClient().getName())
+                .client_id(entity.getClient().getId())
+                .build();
+    }
+
+
+    public ClientDto createClientDto(Client entity) {
+        return ClientDto.builder()
+                .id(entity.id())
+                .name(entity.getName())
+                .email(entity.getElAddress().getEmail())
+                .build();
+    }
+
+    public List<ToDoDto> ToDoToDto(Collection<ToDo> toDos) {
+        return toDos.stream().map(this::createToDoDto)
+                .collect(Collectors.toList());
+
+    }
+
+    public List<ClientDto> ClientToDto(Collection<Client> client) {
+        return client.stream().map(this::createClientDto)
                 .collect(Collectors.toList());
     }
 
-    public static ClientDto createDtoClientFromClient(Client client) {
-        return new ClientDto(client.getName()
-                , client.getElAddress().getEmail()
-                , client.getElAddress().getPhoneNumber()
-                , client.getHomeAddress().getCity()
-                , client.getHomeAddress().getStreet()
-                , client.getHomeAddress().getHouseNumber().toString());
-    }
 }

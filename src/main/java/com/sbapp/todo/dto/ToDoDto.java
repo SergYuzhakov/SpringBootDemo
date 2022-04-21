@@ -1,8 +1,6 @@
 package com.sbapp.todo.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -10,7 +8,10 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@ToString
 public class ToDoDto implements Serializable {
+    private Long id;
 
     private String description;
 
@@ -21,5 +22,7 @@ public class ToDoDto implements Serializable {
     private boolean completed;
 
     private String clientName;
+
+    private Long client_id;
 
 }
