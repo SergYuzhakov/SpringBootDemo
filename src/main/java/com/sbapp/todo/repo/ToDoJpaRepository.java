@@ -1,11 +1,11 @@
 package com.sbapp.todo.repo;
 
-import com.sbapp.todo.dto.ToDoDto;
 import com.sbapp.todo.model.ToDo;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -21,15 +21,19 @@ public interface ToDoJpaRepository extends PagingAndSortingRepository<ToDo, Long
 
 
     @Query("""
-            SELECT t FROM ToDo t
-            JOIN FETCH t.client
-            WHERE :isFiltered = false
-                        OR LOWER(t.description) LIKE CONCAT('%',LOWER(:filter),'%' )\s
-                        ORDER BY t.created DESC\s
-                        
-            """
+             SELECT t FROM ToDo t
+             JOIN FETCH t.client
+             WHERE 
+                   (t.created >= :fromDate AND t.created <= :toDate)
+                AND
+                   (LOWER(t.client.name) LIKE CONCAT('%', LOWER(:filter), '%') 
+                   OR LOWER(t.description) LIKE CONCAT('%',LOWER(:filter),'%' ))
+            ORDER BY t.created DESC
+                         
+             """
     )
-    Collection<ToDo> findAllToDosWithClients(boolean isFiltered, String filter);
+    Collection<ToDo> findAllToDosWithClients( String filter,
+                                             LocalDateTime fromDate, LocalDateTime toDate);
 
     @Query("""
             SELECT t FROM ToDo t
@@ -46,6 +50,6 @@ public interface ToDoJpaRepository extends PagingAndSortingRepository<ToDo, Long
                         ORDER BY t.created DESC\s
                         
              """)
-    Collection<ToDo> findAllToDosByClientNameLike(boolean isFiltered,String partName);
+    Collection<ToDo> findAllToDosByClientNameLike(boolean isFiltered, String partName);
 
 }

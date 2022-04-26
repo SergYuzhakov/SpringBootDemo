@@ -5,7 +5,6 @@ import com.sbapp.todo.dto.ToDoDto;
 import com.sbapp.todo.model.Client;
 import com.sbapp.todo.model.ToDo;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
 
 import java.util.Collection;
 import java.util.List;

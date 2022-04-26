@@ -68,7 +68,7 @@ class ToDoRestControllerTest {
     @Test
     @DisplayName("GET ToDos")
     void getToDos() throws Exception {
-        doReturn(List.of(testToDoWithId)).when(service).getAll("");
+        doReturn(List.of(testToDoWithId)).when(service).getAll("", null, null);
         this.mvc.perform(get("/api/todo?filter=")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())

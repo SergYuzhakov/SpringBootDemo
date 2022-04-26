@@ -54,7 +54,7 @@ class ToDoJpaRepositoryTest {
 
     @Test
     void findAllToDoWithClients() {
-        Iterable<ToDo> toDos = this.toDoRepository.findAllToDosWithClients(false, "");
+        Iterable<ToDo> toDos = this.toDoRepository.findAllToDosWithClients( "", null, null);
         assertEquals(2, toDos.spliterator().estimateSize());
         assertEquals("Read a book", toDos.iterator().next().getDescription());
 

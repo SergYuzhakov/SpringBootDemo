@@ -14,7 +14,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
 import java.net.URI;
-import java.util.List;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @RestController
@@ -27,17 +27,20 @@ public class ToDoRestController {
 
     @GetMapping("/todo")
     @TimeLogger
-    public ResponseEntity<?> getToDos(@RequestParam("filter") String filter) {
+    public ResponseEntity<?> getToDos(@RequestParam("filter") String filter,
+                                      @RequestParam(required = false, value = "fromDate") LocalDateTime fromDate,
+                                      @RequestParam(required = false, value = "toDate") LocalDateTime toDate) {
         return ResponseEntity.ok()
-                .body(toDoService.getAll(filter));
+                .body(toDoService.getAll(filter, fromDate, toDate));
     }
 
     @GetMapping("/todoPageable")
     @TimeLogger
     // пример запроса http://localhost:8080/api/todoPageable?page=0&size=4&sort=created&filter=
-    public ResponseEntity<Page<ToDoDto>> getPageableToDoDto(Pageable pageable, String filter){
+    public ResponseEntity<Page<ToDoDto>> getPageableToDoDto(Pageable pageable, String filter,
+                                                            LocalDateTime fromDate, LocalDateTime toDate) {
         return ResponseEntity.ok()
-                .body(toDoService.findAllToDoDto(pageable, filter));
+                .body(toDoService.findAllToDoDto(pageable, filter, fromDate, toDate));
     }
 
     @GetMapping("/todo/{id}")

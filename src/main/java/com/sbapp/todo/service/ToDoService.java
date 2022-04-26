@@ -2,6 +2,7 @@ package com.sbapp.todo.service;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sbapp.AppConfig;
 import com.sbapp.todo.dto.ToDoDto;
 import com.sbapp.todo.model.Client;
 import com.sbapp.todo.model.ToDo;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -32,14 +34,16 @@ public class ToDoService {
 
     private DtoUtil dtoUtil;
 
-    public List<ToDoDto> getAll(String filter) {
-        boolean isFiltered = !filter.trim().isEmpty();
+    public List<ToDoDto> getAll(String filter, LocalDateTime fromDate, LocalDateTime toDate) {
         return dtoUtil.ToDoToDto(jpaRepository
-                .findAllToDosWithClients(isFiltered, filter));
+                .findAllToDosWithClients(filter,
+                        AppConfig.atStartOfDayOrMin(fromDate),
+                        AppConfig.atStartOfDayOrMax(toDate)));
     }
 
-    public Page<ToDoDto> findAllToDoDto(Pageable pageable, String filter) {
-        List<ToDoDto> dtoList = getAll(filter);
+    public Page<ToDoDto> findAllToDoDto(Pageable pageable, String filter,
+                                        LocalDateTime fromDate, LocalDateTime toDate) {
+        List<ToDoDto> dtoList = getAll(filter, fromDate, toDate);
 
         final int startPage = (int) pageable.getOffset();
         final int endPage = Math.min((startPage + pageable.getPageSize()), dtoList.size());
@@ -62,7 +66,7 @@ public class ToDoService {
     public Iterable<ToDoDto> getAllToDoDtoByClientName(String partName) {
         boolean isPartName = !partName.trim().isEmpty();
         return dtoUtil.ToDoToDto(jpaRepository
-                .findAllToDosByClientNameLike(isPartName,partName));
+                .findAllToDosByClientNameLike(isPartName, partName));
     }
 
     @Transactional
