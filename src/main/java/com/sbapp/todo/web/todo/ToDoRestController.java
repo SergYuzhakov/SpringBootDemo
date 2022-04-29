@@ -38,7 +38,10 @@ public class ToDoRestController {
     @TimeLogger
     // пример запроса http://localhost:8080/api/todoPageable?page=0&size=4&sort=created&filter=
     public ResponseEntity<Page<ToDoDto>> getPageableToDoDto(Pageable pageable, String filter,
-                                                            LocalDateTime fromDate, LocalDateTime toDate) {
+                                                            @RequestParam(required = false, value = "fromDate")
+                                                            LocalDateTime fromDate,
+                                                            @RequestParam(required = false, value = "toDate")
+                                                            LocalDateTime toDate) {
         return ResponseEntity.ok()
                 .body(toDoService.findAllToDoDto(pageable, filter, fromDate, toDate));
     }

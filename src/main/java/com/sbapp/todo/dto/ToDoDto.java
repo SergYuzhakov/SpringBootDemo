@@ -23,6 +23,6 @@ public class ToDoDto implements Serializable {
 
     private String clientName;
 
-    private Long client_id;
+    private Long clientId;
 
 }

@@ -21,7 +21,7 @@ public class DtoUtil {
                 .modifiedTodo(entity.getModified())
                 .completed(entity.isCompleted())
                 .clientName(entity.getClient().getName())
-                .client_id(entity.getClient().getId())
+                .clientId(entity.getClient().id())
                 .build();
     }
 
