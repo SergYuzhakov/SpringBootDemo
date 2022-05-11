@@ -2,8 +2,10 @@ package com.sbapp.todo.service;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sbapp.todo.dto.ClientDto;
 import com.sbapp.todo.model.Client;
 import com.sbapp.todo.repo.ClientsJpaRepository;
+import com.sbapp.todo.util.DtoUtil;
 import com.sbapp.todo.util.ValidationUtil;
 import com.sbapp.todo.util.exception.JsonMappingHandlerException;
 import com.sbapp.todo.util.exception.NoSuchElementFoundException;
@@ -13,6 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.Optional;
 
 @Service
@@ -22,8 +25,11 @@ public class ClientService {
     private final ClientsJpaRepository clientsRepository;
     private ObjectMapper objectMapper;
 
-    public Iterable<Client> getAllClients() {
-        return clientsRepository.findAll();
+    private DtoUtil dtoUtil;
+
+    public Collection<ClientDto> getAllClients(String filter) {
+        String query = filter.trim();
+        return dtoUtil.ClientToDto(clientsRepository.fetchClients(filter));
     }
 
     public Optional<Client> getClientById(Long id) {

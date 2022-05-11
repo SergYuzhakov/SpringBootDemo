@@ -4,9 +4,19 @@ import com.sbapp.todo.model.Client;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.Collection;
 import java.util.Optional;
 
 public interface ClientsJpaRepository extends JpaRepository<Client, Long> {
+
+    @Query("""
+            SELECT c FROM Client c
+            WHERE 
+            LOWER(c.name) LIKE CONCAT('%', :filter, '%')
+            ORDER BY c.name ASC 
+                        """)
+    Collection<Client> fetchClients(String filter);
+
 
     @Query("""
             SELECT c

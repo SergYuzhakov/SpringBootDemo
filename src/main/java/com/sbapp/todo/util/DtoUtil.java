@@ -31,6 +31,7 @@ public class DtoUtil {
                 .id(entity.id())
                 .name(entity.getName())
                 .email(entity.getElAddress().getEmail())
+                .phoneNumber(entity.getElAddress().getPhoneNumber())
                 .build();
     }
 

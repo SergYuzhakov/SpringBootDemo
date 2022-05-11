@@ -70,7 +70,7 @@ class ToDoJpaRepositoryTest {
 
     @Test
     void findAllToDoByClientNameLike() {
-        Iterable<ToDo> toDos = this.toDoRepository.findAllToDosByClientNameLike(true,"jo");
+        Iterable<ToDo> toDos = this.toDoRepository.findAllToDosByClientNameLike("jo");
         assertEquals(2, toDos.spliterator().estimateSize());
         assertEquals("Jon", toDos.iterator().next().getClient().getName());
 

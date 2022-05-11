@@ -45,11 +45,11 @@ public interface ToDoJpaRepository extends PagingAndSortingRepository<ToDo, Long
     @Query("""
             SELECT t FROM ToDo t
             JOIN FETCH t.client
-            WHERE :isFiltered = false
-                        OR LOWER(t.client.name) LIKE CONCAT('%', LOWER(:partName), '%')
-                        ORDER BY t.created DESC\s
+            WHERE 
+            LOWER(t.client.name) LIKE CONCAT('%', LOWER(:partName), '%')
+            ORDER BY t.created DESC
                         
              """)
-    Collection<ToDo> findAllToDosByClientNameLike(boolean isFiltered, String partName);
+    Collection<ToDo> findAllToDosByClientNameLike(String partName);
 
 }

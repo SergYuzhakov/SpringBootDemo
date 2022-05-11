@@ -1,11 +1,9 @@
 package com.sbapp.todo.web.client;
 
-import com.sbapp.todo.dto.ClientDto;
+import com.sbapp.annotations.TimeLogger;
 import com.sbapp.todo.model.Client;
 import com.sbapp.todo.service.ClientService;
-import com.sbapp.todo.util.DtoUtil;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,14 +16,15 @@ import java.net.URI;
 @RequestMapping("/api")
 @AllArgsConstructor
 @Slf4j
+@CrossOrigin(origins = "http://localhost:3000")
 public class ClientRestController {
     private ClientService clientService;
-    private DtoUtil dtoUtil;
 
     @GetMapping("/clients")
-    public ResponseEntity<Iterable<Client>> getClients() {
+    @TimeLogger
+    public ResponseEntity<?> getClients(@RequestParam("filter") String filter) {
         return ResponseEntity
-                .ok(clientService.getAllClients());
+                .ok(clientService.getAllClients(filter));
     }
 
     @GetMapping("/clients/{id}")
@@ -36,9 +35,9 @@ public class ClientRestController {
 
     @RequestMapping(value = "/clients", method = {RequestMethod.POST,
             RequestMethod.PUT, RequestMethod.PATCH})
+    @TimeLogger
     public ResponseEntity<?> updateClient(@Valid @RequestBody Client client) {
         Client updateClient = clientService.updateClient(client);
-        ClientDto clientDto = dtoUtil.createClientDto(updateClient);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
@@ -46,7 +45,7 @@ public class ClientRestController {
                 .toUri();
         return ResponseEntity
                 .created(location)
-                .body(clientDto);
+                .body(updateClient);
     }
 
     @DeleteMapping("/clients/{id}")

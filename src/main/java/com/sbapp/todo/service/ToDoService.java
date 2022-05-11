@@ -64,9 +64,8 @@ public class ToDoService {
     }
 
     public Iterable<ToDoDto> getAllToDoDtoByClientName(String partName) {
-        boolean isPartName = !partName.trim().isEmpty();
         return dtoUtil.ToDoToDto(jpaRepository
-                .findAllToDosByClientNameLike(isPartName, partName));
+                .findAllToDosByClientNameLike(partName));
     }
 
     @Transactional
@@ -97,6 +96,7 @@ public class ToDoService {
                 } catch (Exception e) {
                     throw new SqlUniqueConstraintException("Duplicate email or phone number");
                 }
+                assert clientId != null;
                 toDo.setClient(clientsRepository.findById(clientId).get());
             }
             return jpaRepository.save(toDo);
