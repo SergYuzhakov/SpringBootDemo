@@ -69,7 +69,7 @@ public class ToDoService {
     }
 
     @Transactional
-    public ToDo updateToDo(ToDo toDo) {
+    public ToDo create(ToDo toDo) {
         if (!toDo.isNew()) {
             ToDo oldTodo = getToDoById(toDo.getId()).get();
             Client oldToDoClient = oldTodo.getClient();
@@ -102,6 +102,17 @@ public class ToDoService {
             return jpaRepository.save(toDo);
         }
     }
+
+    @Transactional
+    public ToDo update(Long id, String description, Boolean completed) {
+        ToDo oldToDo = getToDoById(id).get();
+        Client client = oldToDo.getClient();
+        oldToDo.setCompleted(completed);
+        oldToDo.setDescription(description);
+        oldToDo.setClient(client);
+        return jpaRepository.save(oldToDo);
+    }
+
 
     @Transactional
     public void deleteToDoById(Long id) {

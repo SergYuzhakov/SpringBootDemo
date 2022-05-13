@@ -65,18 +65,38 @@ public class ToDoRestController {
     }
 
     @RequestMapping(value = "/todo", method = {RequestMethod.PUT,
-            RequestMethod.POST, RequestMethod.PATCH})
-    public ResponseEntity<?> updateToDo(@Valid @RequestBody ToDo toDo) {
-        ToDo patchToDo = toDoService.updateToDo(toDo);
+            RequestMethod.POST})
+    public ResponseEntity<?> createToDo(@Valid @RequestBody ToDo toDo) {
+        ToDo result = toDoService.create(toDo);
         // List<ToDoDto> dtoList = DtoUtil.createToDoDtoFromToDo(List.of(patchToDo));
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
-                .buildAndExpand(patchToDo.getId())
+                .buildAndExpand(result.getId())
                 .toUri();
         return ResponseEntity
                 .created(location)
-                .body(patchToDo);
+                .body(result);
     }
+
+    @RequestMapping(value = "/todo/{id}",
+            method = RequestMethod.PATCH)
+    @TimeLogger
+    public ResponseEntity<?> updateToDo(@PathVariable Long id,
+            @Valid @RequestParam("description") String description,
+                                  @RequestParam("completed") Boolean completed) {
+        ToDo updateToDo = toDoService.update(id,description, completed);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .buildAndExpand(updateToDo.getId())
+                .toUri();
+        return ResponseEntity
+                .created(location)
+                .body(updateToDo);
+    }
+
+
+
+
 
     @DeleteMapping("/todo/{id}")
     public ResponseEntity<ToDo> deleteToDo(@PathVariable Long id) {

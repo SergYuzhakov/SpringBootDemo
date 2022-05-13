@@ -1,6 +1,5 @@
 package com.sbapp.todo.web.todo;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sbapp.todo.ToDoUtil;
 import com.sbapp.todo.model.ToDo;
@@ -51,13 +50,11 @@ class ToDoRestControllerTest {
     private ToDo testToDoWithId;
     private ToDo invalidToDo;
 
-
     @BeforeEach
-    void setUp() throws JsonProcessingException {
+    void setUp() {
         testToDo = ToDoUtil.getToDosTest().iterator().next();
         testToDoWithId = ToDoUtil.getToDoWithIdTest();
         invalidToDo = ToDoUtil.getInvalidToDo();
-
 
     }
 
@@ -96,7 +93,7 @@ class ToDoRestControllerTest {
     @Test
     @DisplayName("Create ToDo")
     void createToDo() throws Exception {
-        doReturn(testToDoWithId).when(service).updateToDo(any());
+        doReturn(testToDoWithId).when(service).create(any());
         this.mvc.perform(post("/api/todo")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(testToDo)))
@@ -113,7 +110,7 @@ class ToDoRestControllerTest {
     @Test
     @DisplayName("Create invalid ToDo")
     void createInValidToDo() throws Exception {
-        doReturn(invalidToDo).when(service).updateToDo(any());
+        doReturn(invalidToDo).when(service).create(any());
         this.mvc.perform(post("/api/todo")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
@@ -129,7 +126,7 @@ class ToDoRestControllerTest {
         String content = objectMapper.writeValueAsString(testToDoWithId);
         ToDo updateContent = objectMapper.readValue(content, ToDo.class);
         updateContent.setDescription("New Description");
-        doReturn(updateContent).when(service).updateToDo(testToDoWithId);
+        doReturn(updateContent).when(service).create(testToDoWithId);
         this.mvc.perform(put("/api/todo")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(testToDoWithId)))
@@ -141,6 +138,27 @@ class ToDoRestControllerTest {
                 .andExpect(jsonPath("completed", is(false)));
 
     }
+
+    @Test
+    void patchToDo() throws Exception {
+        String content = objectMapper.writeValueAsString(testToDoWithId);
+        ToDo updateContent = objectMapper.readValue(content, ToDo.class);
+        updateContent.setCompleted(true);
+        updateContent.setDescription("Walk together");
+        doReturn(updateContent).when(service)
+                .update(1L, "Walk together", true);
+        this.mvc.perform(patch("/api/todo/{id}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("description", "Walk together")
+                        .param("completed", "true"))
+                .andDo(print())
+                .andExpect(status().isCreated())
+                .andExpect(header().string(HttpHeaders.LOCATION, "http://localhost/api/todo/1"))
+                .andExpect(jsonPath("id", is(1)))
+                .andExpect(jsonPath("description", is("Walk together")))
+                .andExpect(jsonPath("completed", is(true)));
+    }
+
 
     @Test
     @DisplayName("Delete ToDo with id=1")

@@ -12,13 +12,13 @@ import java.time.LocalDateTime;
 @ToString
 public class ToDoDto implements Serializable {
     private Long id;
-
+    @Setter
     private String description;
 
     private LocalDateTime createdTodo;
 
     private LocalDateTime modifiedTodo;
-
+    @Setter
     private boolean completed;
 
     private String clientName;
