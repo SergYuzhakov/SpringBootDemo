@@ -4,6 +4,7 @@ import com.sbapp.todo.util.ErrorResponse;
 import com.sbapp.todo.util.exception.AppException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.validator.internal.engine.ConstraintViolationImpl;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import java.util.Iterator;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -39,11 +43,42 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                                                                   HttpHeaders headers,
                                                                   HttpStatus status,
                                                                   WebRequest request) {
-        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Validation error. Check 'errors' field for details.");
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY.value()
+                , "Validation error. Check 'errors' field for details.");
         for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
-            errorResponse.addValidationError(fieldError.getField(), fieldError.getDefaultMessage());
+            String field = fieldError.getField();
+            errorResponse.addValidationError(field.substring(field.lastIndexOf(".") + 1), fieldError.getDefaultMessage());
         }
         return ResponseEntity.unprocessableEntity().body(errorResponse);
     }
+
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    @ExceptionHandler({ConstraintViolationException.class})
+    //срабатывает при нарушении ограничений базы данных - @NotNull, @Size(min=xxx, max=yyy) и т.п.
+    public ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException ex, WebRequest request) {
+
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                "Validation error. Check 'errors' field for details.");
+        for (Iterator<ConstraintViolation<?>> it = ex.getConstraintViolations().stream().iterator(); it.hasNext(); ) {
+            ConstraintViolationImpl vi = (ConstraintViolationImpl) it.next();
+            String field = vi.getPropertyPath().toString();
+            errorResponse.addValidationError(field.substring(field.indexOf(".") + 1), vi.getMessage());
+        }
+
+        return ResponseEntity.unprocessableEntity().body(errorResponse);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers, HttpStatus status, WebRequest request) {
+        return buildErrorResponse(ex, status);
+    }
+
+    private ResponseEntity<Object> buildErrorResponse(Exception exception,
+                                                      HttpStatus httpStatus) {
+        ErrorResponse errorResponse = new ErrorResponse(httpStatus.value(), exception.getMessage());
+        log.info(errorResponse.getMessage());
+        return ResponseEntity.status(httpStatus).body(errorResponse);
+    }
+
 
 }

@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.net.URI;
 import java.time.LocalDateTime;
 
@@ -82,9 +84,9 @@ public class ToDoRestController {
             method = RequestMethod.PATCH)
     @TimeLogger
     public ResponseEntity<?> updateToDo(@PathVariable Long id,
-            @Valid @RequestParam("description") String description,
-                                  @RequestParam("completed") Boolean completed) {
-        ToDo updateToDo = toDoService.update(id,description, completed);
+                                        @RequestParam("description") @NotBlank @Size(min = 10, max = 100) String description,
+                                        @RequestParam("completed") Boolean completed) {
+        ToDo updateToDo = toDoService.update(id, description, completed);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .buildAndExpand(updateToDo.getId())
@@ -95,13 +97,12 @@ public class ToDoRestController {
     }
 
 
-
-
-
     @DeleteMapping("/todo/{id}")
     public ResponseEntity<ToDo> deleteToDo(@PathVariable Long id) {
         toDoService.deleteToDoById(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity
+                .noContent()
+                .build();
     }
 
 }
