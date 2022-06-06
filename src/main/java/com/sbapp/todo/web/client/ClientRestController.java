@@ -30,14 +30,14 @@ public class ClientRestController {
     @GetMapping("/clients/{id}")
     public ResponseEntity<Client> getClientById(@PathVariable Long id) {
         return ResponseEntity
-                .ok(clientService.getClientById(id).get());
+                .ok(clientService.getClientById(id));
     }
 
     @RequestMapping(value = "/clients", method = {RequestMethod.POST,
             RequestMethod.PUT, RequestMethod.PATCH})
     @TimeLogger
     public ResponseEntity<?> updateClient(@Valid @RequestBody Client client) {
-        Client updateClient = clientService.updateClient(client);
+        Client updateClient = clientService.createClient(client);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")

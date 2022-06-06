@@ -1,7 +1,5 @@
 package com.sbapp.todo.service;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sbapp.AppConfig;
 import com.sbapp.todo.dto.ToDoDto;
 import com.sbapp.todo.model.Client;
@@ -9,9 +7,7 @@ import com.sbapp.todo.model.ToDo;
 import com.sbapp.todo.repo.ClientsJpaRepository;
 import com.sbapp.todo.repo.ToDoJpaRepository;
 import com.sbapp.todo.util.DtoUtil;
-import com.sbapp.todo.util.exception.JsonMappingHandlerException;
 import com.sbapp.todo.util.exception.NoSuchElementFoundException;
-import com.sbapp.todo.util.exception.SqlUniqueConstraintException;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -30,7 +26,6 @@ public class ToDoService {
 
     private final ToDoJpaRepository jpaRepository;
     private final ClientsJpaRepository clientsRepository;
-    private ObjectMapper objectMapper;
 
     private DtoUtil dtoUtil;
 
@@ -56,11 +51,11 @@ public class ToDoService {
                 .findAllToDosByClient(id));
     }
 
-    public Optional<ToDo> getToDoById(Long id) {
-        return Optional.ofNullable(jpaRepository
+    public ToDo getToDoById(Long id) {
+        return jpaRepository
                 .findToDoById(id).orElseThrow(() ->
                         new NoSuchElementFoundException(
-                                String.format("ToDo with id = %d not found...", id))));
+                                String.format("ToDo with id = %d not found...", id)));
     }
 
     public Iterable<ToDoDto> getAllToDoDtoByClientName(String partName) {
@@ -70,54 +65,35 @@ public class ToDoService {
 
     @Transactional
     public ToDo create(ToDo toDo) {
-        if (!toDo.isNew()) {
-            ToDo oldTodo = getToDoById(toDo.getId()).get();
-            Client oldToDoClient = oldTodo.getClient();
-            toDo.setClient(oldToDoClient);
-            try {
-                objectMapper.updateValue(oldTodo, toDo);
-            } catch (JsonMappingException e) {
-                throw new JsonMappingHandlerException("Json mapping error(s).");
-            }
-            return jpaRepository.save(oldTodo);
+        Client client = toDo.getClient();
+        if (!client.isNew()) {
+            assert client.getId() != null;
+            Optional<Client> fromDb = clientsRepository.findById(client.getId());
+            fromDb.ifPresent(toDo::setClient);
         } else {
-            Client client = toDo.getClient();
-            Long clientId = null;
-            String email = client.getElAddress().getEmail().toLowerCase();
-            // здесь нужно идентифицировать клиента из базы по email (либо по номеру телефона)
-            if (clientsRepository.existsClientByElAddress_Email(email)) {
-                Optional<Client> fromDb = clientsRepository.getClientByEmailAddress(client.getElAddress().getEmail());
-                if (fromDb.isPresent()) {
-                    toDo.setClient(fromDb.get());
-                }
-            } else {
-                try {
-                    clientId = clientsRepository.save(toDo.getClient()).getId();
-                } catch (Exception e) {
-                    throw new SqlUniqueConstraintException("Duplicate email or phone number");
-                }
-                assert clientId != null;
-                toDo.setClient(clientsRepository.findById(clientId).get());
-            }
-            return jpaRepository.save(toDo);
+            Long clientId = clientsRepository.save(client).getId();
+            assert clientId != null;
+            clientsRepository.findById(clientId).ifPresent(toDo::setClient);
+
         }
+        return jpaRepository.save(toDo);
+
     }
 
     @Transactional
     public ToDo update(Long id, String description, Boolean completed) {
-        ToDo oldToDo = getToDoById(id).get();
-        Client client = oldToDo.getClient();
-        oldToDo.setCompleted(completed);
-        oldToDo.setDescription(description);
-        oldToDo.setClient(client);
-        return jpaRepository.save(oldToDo);
+        ToDo updateToDo = getToDoById(id);
+        Client client = updateToDo.getClient();
+        updateToDo.setCompleted(completed);
+        updateToDo.setDescription(description);
+        updateToDo.setClient(client);
+        return updateToDo;
     }
 
 
     @Transactional
     public void deleteToDoById(Long id) {
-        if (getToDoById(id).isPresent())
-            jpaRepository.deleteById(id);
+        jpaRepository.deleteById(id);
     }
 
 }

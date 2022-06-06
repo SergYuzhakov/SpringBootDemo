@@ -61,7 +61,7 @@ class ClientRestControllerTest {
 
     @Test
     void createClient() throws Exception {
-        doReturn(clientWithId).when(clientService).updateClient(any());
+        doReturn(clientWithId).when(clientService).createClient(any());
         log.info("Client: {}", jsonClient);
         this.mvc.perform(post("/api/clients")
                         .contentType(APPLICATION_JSON)
@@ -76,7 +76,7 @@ class ClientRestControllerTest {
     void updateClient() throws Exception {
         updateClient.setId(2L);
         updateClient.setName("Jonns");
-        doReturn(updateClient).when(clientService).updateClient(any());
+        doReturn(updateClient).when(clientService).createClient(any());
         this.mvc.perform(put("/api/clients")
                         .contentType(APPLICATION_JSON)
                         .accept(APPLICATION_JSON)

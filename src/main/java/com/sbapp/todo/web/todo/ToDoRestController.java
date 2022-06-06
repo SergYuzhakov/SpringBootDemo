@@ -51,7 +51,7 @@ public class ToDoRestController {
     @GetMapping("/todo/{id}")
     @TimeLogger
     public ResponseEntity<ToDo> getToDoById(@PathVariable Long id) {
-        return ResponseEntity.ok(toDoService.getToDoById(id).get());
+        return ResponseEntity.ok(toDoService.getToDoById(id));
     }
 
     @GetMapping("/todo/client/{id}")

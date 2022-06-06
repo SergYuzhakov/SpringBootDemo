@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.internal.engine.ConstraintViolationImpl;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +29,8 @@ import java.util.Map;
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private final ErrorAttributes attributes;
 
-    @ExceptionHandler(AppException.class) // отрабатывает при возникновении исключений наследованных от нашего AppException
+    @ExceptionHandler(AppException.class)
+    // отрабатывает при возникновении исключений наследованных от нашего AppException
     public ResponseEntity<Map<String, Object>> appException(AppException ex, WebRequest request) {
         Map<String, Object> body = attributes.getErrorAttributes(request, ex.getAttributeOptions());
         HttpStatus status = ex.getStatus();
@@ -38,7 +40,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @Override
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY) // отрабатывает вывод при возникновении ошибок валидации данных Entity
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    // отрабатывает вывод при возникновении ошибок валидации данных Entity
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
                                                                   HttpHeaders headers,
                                                                   HttpStatus status,
@@ -67,6 +70,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         return ResponseEntity.unprocessableEntity().body(errorResponse);
     }
+
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    @ExceptionHandler({DataIntegrityViolationException.class})
+    //срабатывает при нарушении уникальности в базе данных - повторяющееся значение ключа нарушает ограничение уникальности
+    public ResponseEntity<Object> handle(Exception ex, WebRequest request) {
+
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                "Error input data. Check 'errors' field for details.");
+        String field = "Email/Phone number";
+        errorResponse.addValidationError(field, "Сheck input data");
+        return ResponseEntity.unprocessableEntity().body(errorResponse);
+    }
+
 
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers, HttpStatus status, WebRequest request) {

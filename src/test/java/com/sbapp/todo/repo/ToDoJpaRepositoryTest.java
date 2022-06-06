@@ -1,5 +1,6 @@
 package com.sbapp.todo.repo;
 
+import com.sbapp.AppConfig;
 import com.sbapp.todo.ClientUtil;
 import com.sbapp.todo.ToDoUtil;
 import com.sbapp.todo.model.Client;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.DirtiesContext;
 
+import java.util.Collection;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -54,24 +56,25 @@ class ToDoJpaRepositoryTest {
 
     @Test
     void findAllToDoWithClients() {
-        Iterable<ToDo> toDos = this.toDoRepository.findAllToDosWithClients( "", null, null);
-        assertEquals(2, toDos.spliterator().estimateSize());
+        Collection<ToDo> toDos = this.toDoRepository.findAllToDosWithClients( "",
+                AppConfig.atStartOfDayOrMin(null), AppConfig.atStartOfDayOrMax(null));
+        assertEquals(2, toDos.size());
         assertEquals("Read a book", toDos.iterator().next().getDescription());
 
     }
 
     @Test
     void findAllToDoByClient() {
-        Iterable<ToDo> toDos = this.toDoRepository.findAllToDosByClient(1000L);
-        assertEquals(2, toDos.spliterator().estimateSize());
+        Collection<ToDo> toDos = this.toDoRepository.findAllToDosByClient(1000L);
+        assertEquals(2, toDos.size());
         assertEquals("Read a book", toDos.iterator().next().getDescription());
 
     }
 
     @Test
     void findAllToDoByClientNameLike() {
-        Iterable<ToDo> toDos = this.toDoRepository.findAllToDosByClientNameLike("jo");
-        assertEquals(2, toDos.spliterator().estimateSize());
+        Collection<ToDo> toDos = this.toDoRepository.findAllToDosByClientNameLike("jo");
+        assertEquals(2, toDos.size());
         assertEquals("Jon", toDos.iterator().next().getClient().getName());
 
     }

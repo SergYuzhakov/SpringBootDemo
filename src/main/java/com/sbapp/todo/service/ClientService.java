@@ -14,6 +14,7 @@ import com.sbapp.todo.util.exception.SqlUniqueConstraintException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -24,44 +25,40 @@ import java.util.Optional;
 public class ClientService {
     private final ClientsJpaRepository clientsRepository;
     private ObjectMapper objectMapper;
-
     private DtoUtil dtoUtil;
 
     public Collection<ClientDto> getAllClients(String filter) {
         String query = filter.trim();
-        return dtoUtil.ClientToDto(clientsRepository.fetchClients(filter));
+        return dtoUtil.ClientToDto(clientsRepository.fetchClients(query));
     }
 
-    public Optional<Client> getClientById(Long id) {
-        return Optional.ofNullable(clientsRepository.findById(id)
+    public Client getClientById(Long id) {
+        return clientsRepository.findById(id)
                 .orElseThrow(() ->
                         new NoSuchElementFoundException(
-                                String.format("ToDo with id = %d not found...", id))));
+                                String.format("ToDo with id = %d not found...", id)));
     }
 
-    public Client updateClient(Client client) {
+    @Transactional
+    public Client createClient(Client client) {
         if (!client.isNew()) {
-            Client oldClient = getClientById(client.getId()).get();
+            Client updateClient = getClientById(client.getId());
             try {
-                objectMapper.updateValue(oldClient, client);
+                objectMapper.updateValue(updateClient, client);
             } catch (JsonMappingException e) {
                 throw new JsonMappingHandlerException("Json mapping error(s).");
             }
-            return clientsRepository.save(oldClient);
+            return updateClient;
         } else {
-            try {
-                log.info("Client to service: {}", client);
-                Client newClient = clientsRepository.save(client);
-                return newClient;
-            } catch (Exception e) {
-                throw new SqlUniqueConstraintException("Client with this email and phone already exist!");
-            }
+            log.info("Client to service: {}", client);
+            Client newClient = clientsRepository.save(client);
+            return newClient;
         }
     }
 
+    @Transactional
     public void deleteClientById(Long id) {
-        if (getClientById(id).isPresent())
-            clientsRepository.deleteById(id);
+        clientsRepository.deleteById(id);
     }
 
 }

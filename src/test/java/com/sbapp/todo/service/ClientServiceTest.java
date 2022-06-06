@@ -51,7 +51,7 @@ class ClientServiceTest {
         // Setup our mock repository
         doReturn(savedClient).when(clientsJpaRepository).save(any());
         // Execute the service call
-        Client returnedClient = clientService.updateClient(client);
+        Client returnedClient = clientService.createClient(client);
         log.info("Save Client: {}", returnedClient);
         Assertions.assertNotNull(returnedClient, "The saved client should not be null");
         Assertions.assertEquals("Jon", returnedClient.getName());
