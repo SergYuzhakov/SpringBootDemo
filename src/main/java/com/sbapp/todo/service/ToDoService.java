@@ -1,6 +1,7 @@
 package com.sbapp.todo.service;
 
 import com.sbapp.AppConfig;
+import com.sbapp.annotations.TimeLogger;
 import com.sbapp.todo.dto.ToDoDto;
 import com.sbapp.todo.model.Client;
 import com.sbapp.todo.model.ToDo;
@@ -9,6 +10,7 @@ import com.sbapp.todo.repo.ToDoJpaRepository;
 import com.sbapp.todo.util.DtoUtil;
 import com.sbapp.todo.util.exception.NoSuchElementFoundException;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +24,7 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class ToDoService {
 
     private final ToDoJpaRepository jpaRepository;
@@ -29,6 +32,7 @@ public class ToDoService {
 
     private DtoUtil dtoUtil;
 
+    @TimeLogger
     public List<ToDoDto> getAll(String filter, LocalDateTime fromDate, LocalDateTime toDate) {
         return dtoUtil.ToDoToDto(jpaRepository
                 .findAllToDosWithClients(filter,
@@ -41,8 +45,9 @@ public class ToDoService {
         List<ToDoDto> dtoList = getAll(filter, fromDate, toDate);
 
         final int startPage = (int) pageable.getOffset();
-        final int endPage = Math.min((startPage + pageable.getPageSize()), dtoList.size());
 
+        final int endPage = Math.min((startPage + pageable.getPageSize()), dtoList.size());
+        log.info("Fetch Page - {},{}", startPage, endPage);
         return new PageImpl<>(dtoList.subList(startPage, endPage), pageable, dtoList.size());
     }
 
@@ -64,6 +69,7 @@ public class ToDoService {
     }
 
     @Transactional
+    @TimeLogger
     public ToDo create(ToDo toDo) {
         Client client = toDo.getClient();
         if (!client.isNew()) {
@@ -81,6 +87,7 @@ public class ToDoService {
     }
 
     @Transactional
+    @TimeLogger
     public ToDo update(Long id, String description, Boolean completed) {
         ToDo updateToDo = getToDoById(id);
         Client client = updateToDo.getClient();

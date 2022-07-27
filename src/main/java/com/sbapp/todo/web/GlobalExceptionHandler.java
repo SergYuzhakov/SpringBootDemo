@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.internal.engine.ConstraintViolationImpl;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -75,12 +76,24 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler({DataIntegrityViolationException.class})
     //срабатывает при нарушении уникальности в базе данных - повторяющееся значение ключа нарушает ограничение уникальности
     public ResponseEntity<Object> handle(Exception ex, WebRequest request) {
-
+        log.info("DataIntegrityViolationException - {}", ex.getMessage());
         ErrorResponse errorResponse = new ErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(),
                 "Error input data. Check 'errors' field for details.");
         String field = "Email/Phone number";
         errorResponse.addValidationError(field, "Сheck input data");
         return ResponseEntity.unprocessableEntity().body(errorResponse);
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler({EmptyResultDataAccessException.class})
+    //срабатывает при отсутствии объекта в базе данных
+    public ResponseEntity<Object> handleEmptyResultDataAccess(Exception ex, WebRequest request) {
+        log.info("EmptyResultDataAccessException  - cause: {}", ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.NOT_FOUND.value(),
+                "Error Find Entity");
+        String field = "Entity isn't exist";
+        errorResponse.addValidationError(field, "Operation isn't impossible");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND.value()).body(errorResponse);
     }
 
 

@@ -6,18 +6,14 @@ import com.sbapp.todo.dto.ClientDto;
 import com.sbapp.todo.model.Client;
 import com.sbapp.todo.repo.ClientsJpaRepository;
 import com.sbapp.todo.util.DtoUtil;
-import com.sbapp.todo.util.ValidationUtil;
 import com.sbapp.todo.util.exception.JsonMappingHandlerException;
 import com.sbapp.todo.util.exception.NoSuchElementFoundException;
-import com.sbapp.todo.util.exception.NotFoundException;
-import com.sbapp.todo.util.exception.SqlUniqueConstraintException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -51,8 +47,7 @@ public class ClientService {
             return updateClient;
         } else {
             log.info("Client to service: {}", client);
-            Client newClient = clientsRepository.save(client);
-            return newClient;
+            return clientsRepository.save(client);
         }
     }
 

@@ -68,6 +68,7 @@ public class ToDoRestController {
 
     @RequestMapping(value = "/todo", method = {RequestMethod.PUT,
             RequestMethod.POST})
+    @TimeLogger
     public ResponseEntity<?> createToDo(@Valid @RequestBody ToDo toDo) {
         ToDo result = toDoService.create(toDo);
         // List<ToDoDto> dtoList = DtoUtil.createToDoDtoFromToDo(List.of(patchToDo));
